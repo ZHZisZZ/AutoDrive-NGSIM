@@ -2,7 +2,6 @@ import json
 import numpy as np
 from copy import copy
 from typing import Tuple, List, Callable
-from numpy.testing._private.utils import print_assert_equal
 from sklearn.linear_model import LinearRegression
 from pretraj.vehicle import Vehicle, State
 
@@ -35,12 +34,12 @@ def simulate(
 
     ego_state.ds += dv * dt + .5 * da * dt**2
     ego_state.v += (ego_state.a) * dt
-    # control_law is different for different models
-    ego_state.a = control_law(ego_state, pre_state)
     if ego_state.v <= 0:
       hard_braking = True
-      state_record.extend([State(ds=ego_state.ds)] * (len(pre_states)-i))
-      break
+      ego_state.v = 0
+      # does not change ego_state.ds for simplicity
+    ego_state.a = control_law(ego_state, pre_state)
+
     state_record.append(copy(ego_state))
 
   return tuple(zip(*[(state.ds, state.v, state.a) for state in state_record])) +  tuple([hard_braking])
