@@ -2,6 +2,7 @@ import json
 import numpy as np
 from copy import copy
 from typing import Tuple, List, Callable
+from numpy.testing._private.utils import print_assert_equal
 from sklearn.linear_model import LinearRegression
 from pretraj.vehicle import Vehicle, State
 
@@ -9,7 +10,7 @@ from pretraj import *
 
 
 def simulate(
-    ego_state: State, 
+    ego_state: State,
     pre_states: List[State],
     control_law: Callable[[State, State], float]
 ) -> Tuple[List[int], List[int], List[int]]:
@@ -39,12 +40,49 @@ def simulate(
   return tuple(zip(*[(state.ds, state.v, state.a) for state in state_record]))
 
 
+def simulate(
+    ego_state: State, 
+    pre_states: List[State],
+    control_law: Callable[[State, State], float]
+) -> Tuple[List[int], List[int], List[int], bool]:
+  """Simulate the trajectory of ego vehicle according to states and control law.
+
+  Args:
+    ego_state: the state of ego vehicle at the last observed frame.
+    pre_states: the states of precede vehicles over all predicted frames.
+    control_law: a function that maps current states of two vehicles to the
+      acceleration of the ego vehicle.
+
+  Returns:
+    A tuple of lists of predicted ego vehicle states (headway, velocity, acceleration)
+    and indication whether the car hard brakes.
+  """
+  state_record = []
+  dt = .1
+  hard_braking = False
+  for i, pre_state in enumerate(pre_states):
+    dv = pre_state.v - ego_state.v
+    da = pre_state.a - ego_state.a
+
+    ego_state.ds += dv * dt + .5 * da * dt**2
+    ego_state.v += (ego_state.a) * dt
+    # control_law is different for different models
+    ego_state.a = control_law(ego_state, pre_state)
+    if ego_state.v <= 0:
+      hard_braking = True
+      state_record.extend([State(ds=ego_state.ds)] * (len(pre_states)-i))
+      break
+    state_record.append(copy(ego_state))
+
+  return tuple(zip(*[(state.ds, state.v, state.a) for state in state_record])) +  tuple([hard_braking])
+
+
 def IDM_simulation(
     ego: Vehicle, 
     pre: Vehicle, 
     observe_frames: int, 
     predict_frames: int,
-) -> Tuple[List[int], List[int], List[int]]:
+) -> Tuple[List[int], List[int], List[int], bool]:
   """Simulate the trajectory of ego vehicle based on IDM model (fixed).
 
   Args:
@@ -55,6 +93,7 @@ def IDM_simulation(
 
   Returns:
     A tuple of lists of predicted ego vehicle states (headway, velocity, acceleration)
+    and indication whether the car hard brakes.
   """
   Metre_Foot = 3.2808399
   KilometrePerHour_FootPerSecond = 1000 * Metre_Foot / 3600
@@ -69,7 +108,7 @@ def IDM_simulation(
     b = 2 * Metre_Foot
     c = 0.99
 
-    dv = pre_state.v - ego_state.v
+    dv = ego_state.v - pre_state.v
     ss = s0 + ego_state.v * T + (ego_state.v * dv) / (2*(a*b)**.5)
     s = ego_state.ds - pre.vehicle_length
     return a * (1 - (ego_state.v/v0)**delta - (ss/s)**2)
@@ -85,7 +124,7 @@ def adapt_simulation(
     pre: Vehicle,
     observe_frames: int,
     predict_frames: int,
-) -> Tuple[List[int], List[int], List[int]]:
+) -> Tuple[List[int], List[int], List[int], bool]:
   """Simulate the trajectory of ego vehicle based on adaptation model.
 
   Args:
@@ -96,6 +135,7 @@ def adapt_simulation(
 
   Returns:
     A tuple of lists of predicted ego vehicle states (headway, velocity, acceleration)
+    and indication whether the car hard brakes.
   """
   # Linear regressor to learn coefficients kv, kg, gs
   dv = (pre.vel_vector - ego.vel_vector)[:observe_frames]
@@ -104,9 +144,8 @@ def adapt_simulation(
 
   X = np.vstack([dv, gt]).T.reshape(-1,2)
   reg = LinearRegression(positive=True).fit(X, Y)
-  kv, kg = reg.coef_; gs = -reg.intercept_/kg
-
-  # print(kv, kg, gs)
+  kv, kg = reg.coef_
+  gs = -reg.intercept_/(kg if kg else 1)
 
   def control_law(ego_state, pre_state):
     dv = pre_state.v - ego_state.v
@@ -124,7 +163,7 @@ def model_free_simulation(
     pre: Vehicle,
     observe_frames: int, 
     predict_frames: int,
-) -> Tuple[List[int], List[int], List[int]]:
+) -> Tuple[List[int], List[int], List[int], bool]:
   # TODO
   pass
 
@@ -135,37 +174,11 @@ def predict(
     observe_frames: int,
     predict_frames: int,
     model='adapt'
-) -> np.ndarray:
+) -> Tuple[List[int], List[int], List[int], bool]:
   """predict """
   assert model in ('IDM', 'adapt'), 'model should be IDM or adapt'
-  # print(observe_frames > 0 and predict_frames > 0 and observe_frames + predict_frames <= NUM_FRAMES); exit()
   assert observe_frames > 0 and predict_frames > 0 and observe_frames + predict_frames <= NUM_FRAMES,\
       f'observe_frames > 0 and observe_frames < 0 and observe_frames + predict_frames <= {NUM_FRAMES}'
   return IDM_simulation(ego, pre, observe_frames, predict_frames) if model is 'IDM' \
   else adapt_simulation(ego, pre, observe_frames, predict_frames)
 
-
-
-if __name__ == '__main__': 
-  # test function
-  with open(REDUCED_NGSIM_JSON_PATH) as fp:
-    l = json.load(fp)
-
-  # 3, fail on 1e-4
-  ego = Vehicle(**l[11]['ego'])
-  pre = Vehicle(**l[11]['pre'])
-
-
-  # test adaptation
-  observe_frames = 30
-  predict_frames = 18
-  ds_record, _, _ = adapt_simulation(ego, pre, observe_frames, predict_frames)
-  print(ds_record)
-  print(ego.space_headway_vector[observe_frames:observe_frames+predict_frames])
-
-  # test IDM
-  # observe_frames = 30
-  # predict_frames = 18
-  # ds_record, _, _ = IDM_simulation(ego, pre, observe_frames, predict_frames)
-  # print(ds_record)
-  # print(ego.space_headway_vector[observe_frames:observe_frames+predict_frames])
