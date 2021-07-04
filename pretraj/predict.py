@@ -10,37 +10,6 @@ from pretraj import *
 
 
 def simulate(
-    ego_state: State,
-    pre_states: List[State],
-    control_law: Callable[[State, State], float]
-) -> Tuple[List[int], List[int], List[int]]:
-  """Simulate the trajectory of ego vehicle according to states and control law.
-
-  Args:
-    ego_state: the state of ego vehicle at the last observed frame.
-    pre_states: the states of precede vehicles over all predicted frames.
-    control_law: a function that maps current states of two vehicles to the
-      acceleration of the ego vehicle.
-
-  Returns:
-    A tuple of lists of predicted ego vehicle states (headway, velocity, acceleration)
-  """
-  state_record = []
-  dt = .1
-  for pre_state in pre_states:
-    dv = pre_state.v - ego_state.v
-    da = pre_state.a - ego_state.a
-
-    ego_state.ds += dv * dt + .5 * da * dt**2
-    ego_state.v += (ego_state.a) * dt
-    # control_law is different for different models
-    ego_state.a = control_law(ego_state, pre_state)
-    state_record.append(copy(ego_state))
-
-  return tuple(zip(*[(state.ds, state.v, state.a) for state in state_record]))
-
-
-def simulate(
     ego_state: State, 
     pre_states: List[State],
     control_law: Callable[[State, State], float]
