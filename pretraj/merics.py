@@ -5,14 +5,14 @@ def ADE(
     traj_1: np.ndarray, 
     traj_2: np.ndarray
 ):
-  return np.sum((traj_1 - traj_2)**.5)
+  return np.sum(np.abs((traj_1 - traj_2)))
 
 
 def FDE(
     traj_1: np.ndarray, 
     traj_2: np.ndarray
 ): 
-  return (traj_1[-1] - traj_2[-1])**.5
+  return np.abs(traj_1[-1] - traj_2[-1])
 
 
 def evaluate(
