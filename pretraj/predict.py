@@ -55,7 +55,7 @@ def constantv_model(**argvs) -> Callable:
   return control_law
 
 
-def IDM_model(pre, **argvs) -> Callable:
+def IDM_model(pre: Vehicle, **argvs) -> Callable:
   """Get IDM model control function."""
   Metre_Foot = 3.2808399
   KilometrePerHour_FootPerSecond = 1000 * Metre_Foot / 3600
@@ -151,7 +151,6 @@ def nn_model(
   opt = torch.optim.Adam(model.parameters(), lr=lr)
   for _ in range(1000):
     pred = model(X)
-    # loss = torch.sum((Y-pred) ** 2)
     # loss = torch.nn.MSELoss()(Y, pred)
     loss = nn.L1Loss()(Y, pred)
 
@@ -194,10 +193,15 @@ def predict(
   """predict """
   model_dict = {'constantv': constantv_model, 'IDM': IDM_model, 'adapt': adapt_model, 'nn':nn_model}
   assert model in model_dict.keys(), f'model should be {model_dict.keys()}'
-  assert observe_frames > 0 and predict_frames > 0 and observe_frames + predict_frames <= NUM_FRAMES,\
+  assert observe_frames > 0 and predict_frames > 0 and \
+      observe_frames + predict_frames <= NUM_FRAMES, \
       f'observe_frames > 0 and observe_frames < 0 and observe_frames + predict_frames <= {NUM_FRAMES}'
 
-  control_law = model_dict[model](ego=ego, pre=pre, observe_frames=observe_frames)
+  control_law = model_dict[model](
+      ego=ego, 
+      pre=pre, 
+      observe_frames=observe_frames)
+
   return simulate(
       ego.state(observe_frames-1),
       pre.states(observe_frames, predict_frames),
@@ -209,8 +213,8 @@ if __name__ == '__main__':
   with open(REDUCED_NGSIM_JSON_PATH) as fp:
     pair_info = json.load(fp)
 
-  ego = Vehicle(**pair_info[5]['ego'])
-  pre = Vehicle(**pair_info[5]['pre'])
+  ego = Vehicle(**pair_info[7]['ego'])
+  pre = Vehicle(**pair_info[7]['pre'])
 
   from pretraj.merics import ADE, FDE
 
