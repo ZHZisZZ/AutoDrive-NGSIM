@@ -1,3 +1,11 @@
+import numpy as np
+import torch
+import random
+
+torch.manual_seed(3)
+np.random.seed(3)
+random.seed(3)
+
 # number of frames for each car pairs
 NUM_FRAMES = 200
 
