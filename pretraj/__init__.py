@@ -1,5 +1,5 @@
 # number of frames for each car pairs
-NUM_FRAMES = 48
+NUM_FRAMES = 200
 
 # file paths related to ngsim
 NGSIM_PATH = 'pretraj/ngsim/NGSIM.csv'

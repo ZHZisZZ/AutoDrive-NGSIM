@@ -16,7 +16,7 @@ def filter_one():
   # sort according to 'Vehicle_ID' and 'Frame_ID'
   df = df.sort_values(['Vehicle_ID', 'Frame_ID'])
   # retain the information we need and discard others
-  df = df.loc[:, ['Vehicle_ID', 'Frame_ID', 'v_length', 'v_Class', 'v_Vel', 'v_Acc', 
+  df = df.loc[:, ['Vehicle_ID', 'Frame_ID', 'v_Class', 'v_length', 'v_Class', 'v_Vel', 'v_Acc', 
                   'Lane_ID', 'Preceding', 'Following', 'Space_Headway', 'Time_Headway']]
   # write to an intermediate file
   df.to_csv(TEMP_REDUCED_NGSIM_PATH, index=False)
@@ -70,7 +70,7 @@ def filter_two():
 
 
   sorted_pairs = sorted(variance_dict, key=variance_dict.__getitem__, reverse=True)
-  print(sorted_pairs)
+  # print(sorted_pairs)
   print('len:', len(sorted_pairs))
 
   new_df = None
@@ -83,6 +83,7 @@ def filter_two():
     ego_info = {
         'vehicle_id': int(ego_id),
         'frame_id': int(frame_id),
+        'vehicle_class': int(df_ego['v_Class'].iloc[0]),
         'vehicle_length': int(df_ego['v_length'].iloc[0]),
         'acc_vector': df_ego['v_Acc'].tolist(), 
         'vel_vector': df_ego['v_Vel'].tolist(), 
@@ -93,6 +94,7 @@ def filter_two():
     pre_info = {
         'vehicle_id': int(pre_id),
         'frame_id': int(frame_id), 
+        'vehicle_class': int(df_ego['v_Class'].iloc[0]),
         'vehicle_length': int(df_pre['v_length'].iloc[0]), 
         'acc_vector': df_pre['v_Acc'].tolist(), 
         'vel_vector': df_pre['v_Vel'].tolist(), 

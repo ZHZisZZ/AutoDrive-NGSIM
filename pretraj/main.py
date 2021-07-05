@@ -9,9 +9,9 @@ from pretraj import *
 with open(REDUCED_NGSIM_JSON_PATH) as fp:
   pair_info = json.load(fp)
 
-number_vehicles = 60
-observe_frames = 30
-predict_frames = 10
+number_vehicles = 40
+observe_frames = 50
+predict_frames = 30
 
 metrics = ADE
 
