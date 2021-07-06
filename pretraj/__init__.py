@@ -10,7 +10,19 @@ random.seed(3)
 NUM_FRAMES = 200
 
 # file paths related to ngsim
+NGSIM_DIRT = 'pretraj/ngsim/'
 NGSIM_PATH = 'pretraj/ngsim/NGSIM.csv'
 TEMP_REDUCED_NGSIM_PATH = 'pretraj/ngsim/TEMP_REDUCED_NGSIM.csv'
 REDUCED_NGSIM_PATH = 'pretraj/ngsim/REDUCED_NGSIM.csv'
 REDUCED_NGSIM_JSON_PATH = 'pretraj/ngsim/REDUCED_NGSIM.json'
+
+# outliers
+outliers = [113]
+
+# result paths
+RESULT_DIR = 'pretraj/ngsim/res/'
+FIXED_OBSERVE_JSON_PATH = RESULT_DIR + 'fixed_observe.json'
+FIXED_OBSERVE_FIG_PATH = RESULT_DIR + 'fixed_observe.png'
+FIXED_PREDICT_JSON_PATH = RESULT_DIR + 'fixed_predict.json'
+FIXED_PREDICT_FIG_PATH = RESULT_DIR + 'fixed_predict.png'
+RUNTIME_PATH = RESULT_DIR + 'runtime.json'

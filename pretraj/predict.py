@@ -14,7 +14,7 @@ def simulate(
     ego_state: State, 
     pre_states: List[State],
     control_law: Callable[[State, State], float]
-) -> Tuple[List[int], List[int], List[int], bool]:
+) -> Tuple[bool, Tuple[List[int], List[int], List[int]]]:
   """Simulate the trajectory of ego vehicle according to states and control law.
 
   Args:
@@ -44,7 +44,7 @@ def simulate(
 
     state_record.append(copy(ego_state))
 
-  return tuple(zip(*[(state.ds, state.v, state.a) for state in state_record])) +  tuple([hard_braking])
+  return hard_braking, tuple(zip(*[(state.ds, state.v, state.a) for state in state_record]))
 
 
 def constantv_model(**argvs) -> Callable:
@@ -223,12 +223,12 @@ if __name__ == '__main__':
 
   groundtruth_record = ego.space_headway_vector[observe_frames:observe_frames+predict_frames]
 
-  ds_record, _, _, hard_braking = predict(ego, pre, observe_frames, predict_frames, 'nn')
+  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'nn')
   result = ADE(np.array(ds_record), np.array(groundtruth_record))
   print('nn:', result)
-  ds_record, _, _, hard_braking = predict(ego, pre, observe_frames, predict_frames, 'adapt')
+  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'adapt')
   result = ADE(np.array(ds_record), np.array(groundtruth_record))
   print('adapt:', result)
-  ds_record, _, _, hard_braking = predict(ego, pre, observe_frames, predict_frames, 'constantv')
+  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'constantv')
   result = ADE(np.array(ds_record), np.array(groundtruth_record))
   print('constantv:', result)
