@@ -121,7 +121,7 @@ def regularized_adapt_model(
     observe_frames: int,
     **argvs,
 ) -> Callable:
-  """Get adapt model control function.
+  """Get regularized adapt model control function.
 
   Args:
     ego: instance of ego vehicle
@@ -296,15 +296,15 @@ if __name__ == '__main__':
 
   groundtruth_record = ego.space_headway_vector[observe_frames:observe_frames+predict_frames]
 
-  # hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'nn')
-  # result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  # print('nn:', result)
+  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'nn')
+  result = ADE(np.array(ds_record), np.array(groundtruth_record))
+  print('nn:', result)
   hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'adapt')
   result = ADE(np.array(ds_record), np.array(groundtruth_record))
   print('adapt:', result)
   hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'regularized_adapt')
   result = ADE(np.array(ds_record), np.array(groundtruth_record))
   print('regularized adapt:', result)
-  # hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'constantv')
-  # result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  # print('constantv:', result)
+  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'constantv')
+  result = ADE(np.array(ds_record), np.array(groundtruth_record))
+  print('constantv:', result)
