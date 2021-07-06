@@ -20,7 +20,7 @@ REDUCED_NGSIM_JSON_PATH = 'pretraj/ngsim/REDUCED_NGSIM.json'
 outliers = [113]
 
 # result paths
-RESULT_DIR = 'pretraj/ngsim/res/'
+RESULT_DIR = 'pretraj/res/'
 FIXED_OBSERVE_JSON_PATH = RESULT_DIR + 'fixed_observe.json'
 FIXED_OBSERVE_FIG_PATH = RESULT_DIR + 'fixed_observe.png'
 FIXED_PREDICT_JSON_PATH = RESULT_DIR + 'fixed_predict.json'
