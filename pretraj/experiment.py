@@ -22,11 +22,12 @@ def warm_up():
 
   number_vehicles = 150
 
-  models_list = ['constantv', 'IDM', 'adapt', 'nn']
+  models_list = ['constantv', 'IDM', 'adapt', 'regularized_adapt', 'nn']
   model_names = {
       'constantv': 'constant velocity', 
       'IDM': 'IDM', 
       'adapt': 'adapt', 
+      'regularized_adapt': 'regularized adapt',
       'nn': 'neural network'
   }
 

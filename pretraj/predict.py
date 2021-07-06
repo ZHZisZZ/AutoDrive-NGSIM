@@ -285,12 +285,13 @@ if __name__ == '__main__':
   with open(REDUCED_NGSIM_JSON_PATH) as fp:
     pair_info = json.load(fp)
 
-  ego = Vehicle(**pair_info[60]['ego'])
-  pre = Vehicle(**pair_info[60]['pre'])
+  ego = Vehicle(**pair_info[9]['ego'])
+  pre = Vehicle(**pair_info[9]['pre'])
 
   from pretraj.merics import ADE, FDE
 
   observe_frames = 100
+
   predict_frames = 50
 
   groundtruth_record = ego.space_headway_vector[observe_frames:observe_frames+predict_frames]
