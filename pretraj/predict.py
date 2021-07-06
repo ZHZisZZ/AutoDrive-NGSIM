@@ -131,14 +131,12 @@ def regularized_adapt_model(
   Returns:
     adapt model control function
   """
-  # Linear regressor to learn coefficients kv, kg, gs
   alpha = 1.
   beta = 1.
   dv = (pre.vel_vector - ego.vel_vector)[:observe_frames]
   gt = (ego.space_headway_vector - pre.vehicle_length)[:observe_frames]
   g0 = gt.mean()
   A = np.array([dv, gt, 0*gt-1]).T
-  # Ap = np.vstack((np.hstack((Ap, 0*Ap[:, [0]])), np.array([0, 0, 0, np.sqrt(alpha)])))
   Ap = np.vstack((np.hstack((A, 0*A[:, [0]])), 
                   np.array([[0, 0, 0, np.sqrt(alpha)],
                             [np.sqrt(beta)*g0, 0, 0, 0],
@@ -147,6 +145,7 @@ def regularized_adapt_model(
 
 
   def solve_sdp(A, b):
+    """Solve dp problem."""
     # x = [kv, kg, u, g]
     # kg*g - u = 0
     K_UB = 20
@@ -167,22 +166,19 @@ def regularized_adapt_model(
     prob.add_constraint(0.5*(X | B) + q.T*x  == 0)
 
     prob.set_objective('min', (X | A.T * A) - 2 * b.T * A * x)
-    # from pprint import pprint
-    # print(prob)
+
     try:
         prob.solve(verbose=0, solver='cvxopt', solve_via_dual=False, tol=EPS/2)
-        # prob.solve(verbose=0, solver='cvxopt', solve_via_dual=False, rel_prim_fsb_tol=EPS/2)
     except ValueError:
         print(A)
         print('retrying')
         prob.solve(verbose=0, solver='cvxopt', solve_via_dual=False, tol=0.1)
-        # prob.solve(verbose=0, solver='cvxopt', solve_via_dual=False, rel_prim_fsb_tol=0.1)
     x_hat = np.array(x.value).T[0]
     assert (x_hat >= EPS-1e-2).all() and (x_hat[:2] <= K_UB+1e-2).all(), '{}'.format(x)
     return x_hat
 
+
   if np.linalg.matrix_rank(A) < A.shape[1]:
-      # print('bad rank')
       params = np.array([0., 0, 0, g0])
   else:
       params = solve_sdp(Ap, bp)
