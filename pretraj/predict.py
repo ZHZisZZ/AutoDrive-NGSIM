@@ -1,6 +1,8 @@
 import json
 import numpy as np
 import torch
+import cvxopt as cvx
+import picos as pic
 from torch import nn
 from copy import copy
 from typing import Tuple, List, Callable
@@ -116,7 +118,8 @@ def adapt_model(
 def regularized_adapt_model(
     ego: Vehicle,
     pre: Vehicle,
-    observe_frames: int, 
+    observe_frames: int,
+    **argvs,
 ) -> Callable:
   """Get adapt model control function.
 
@@ -129,26 +132,69 @@ def regularized_adapt_model(
     adapt model control function
   """
   # Linear regressor to learn coefficients kv, kg, gs
+  alpha = 1.
+  beta = 1.
   dv = (pre.vel_vector - ego.vel_vector)[:observe_frames]
   gt = (ego.space_headway_vector - pre.vehicle_length)[:observe_frames]
-  Y = ego.acc_vector[:observe_frames] # ground truth acceleration
-  X = np.vstack([dv, gt]).T.reshape(-1,2)
+  g0 = gt.mean()
+  A = np.array([dv, gt, 0*gt-1]).T
+  # Ap = np.vstack((np.hstack((Ap, 0*Ap[:, [0]])), np.array([0, 0, 0, np.sqrt(alpha)])))
+  Ap = np.vstack((np.hstack((A, 0*A[:, [0]])), 
+                  np.array([[0, 0, 0, np.sqrt(alpha)],
+                            [np.sqrt(beta)*g0, 0, 0, 0],
+                            [0, np.sqrt(beta)*g0, 0, 0]])))
+  bp = np.hstack((ego.acc_vector[:observe_frames], np.sqrt(alpha)*g0, 0, 0))
 
-  average_dv = np.average(dv)
-  Y = np.hstack([0, Y])
-  X = np.vstack([[average_dv, average_dv], X])
 
-  reg = LinearRegression(positive=True).fit(X, Y)
-  kv, kg = reg.coef_
-  c = reg.intercept_
-  # gs = -reg.intercept_/(kg if kg else 1)
+  def solve_sdp(A, b):
+    # x = [kv, kg, u, g]
+    # kg*g - u = 0
+    K_UB = 20
+    EPS = 1e-5
+    m = A.shape[1]
+    B = np.zeros((m, m))
+    B[1, 3] = B[3, 1] = 1
+    q = np.array([0, 0, -1, 0])
+    A, b, B, q = [cvx.matrix(arr.copy()) for arr in [A, b, B, q]]
+
+    prob = pic.Problem()
+    x = prob.add_variable('x', m)
+    X = prob.add_variable('X', (m, m), vtype='symmetric')
+    prob.add_constraint(x >= EPS)
+    # prob.add_constraint(x[:2] <= K_UB)
+    # [[1, x']; [x, X]] > 0
+    prob.add_constraint(((1 & x.T) // (x & X)) >> 0)
+    prob.add_constraint(0.5*(X | B) + q.T*x  == 0)
+
+    prob.set_objective('min', (X | A.T * A) - 2 * b.T * A * x)
+    # from pprint import pprint
+    # print(prob)
+    try:
+        prob.solve(verbose=0, solver='cvxopt', solve_via_dual=False, tol=EPS/2)
+        # prob.solve(verbose=0, solver='cvxopt', solve_via_dual=False, rel_prim_fsb_tol=EPS/2)
+    except ValueError:
+        print(A)
+        print('retrying')
+        prob.solve(verbose=0, solver='cvxopt', solve_via_dual=False, tol=0.1)
+        # prob.solve(verbose=0, solver='cvxopt', solve_via_dual=False, rel_prim_fsb_tol=0.1)
+    x_hat = np.array(x.value).T[0]
+    assert (x_hat >= EPS-1e-2).all() and (x_hat[:2] <= K_UB+1e-2).all(), '{}'.format(x)
+    return x_hat
+
+  if np.linalg.matrix_rank(A) < A.shape[1]:
+      # print('bad rank')
+      params = np.array([0., 0, 0, g0])
+  else:
+      params = solve_sdp(Ap, bp)
+  kv, kg, g_star = params[0], params[1], params[3]
 
   def control_law(ego_state, pre_state):
     dv = pre_state.v - ego_state.v
     gt = ego_state.ds - pre.vehicle_length # pre.vehicle_length is constant
-    return kv * dv + kg * gt + c
+    return kv * dv + kg * (gt - g_star)
 
   return control_law
+  
 
 
 def nn_model(
@@ -187,6 +233,7 @@ def nn_model(
   lowest = float("inf")
   cnt = 0
   opt = torch.optim.Adam(model.parameters(), lr=lr)
+  # torch.optim.
   for _ in range(1000):
     pred = model(X)
     # loss = torch.nn.MSELoss()(Y, pred)
@@ -216,7 +263,7 @@ def predict(
     model='adapt'
 ) -> Tuple[List[int], List[int], List[int], bool]:
   """predict """
-  model_dict = {'constantv': constantv_model, 'IDM': IDM_model, 'adapt': adapt_model, 'nn':nn_model}
+  model_dict = {'constantv': constantv_model, 'IDM': IDM_model, 'adapt': adapt_model, 'regularized_adapt': regularized_adapt_model ,'nn':nn_model}
   assert model in model_dict.keys(), f'model should be {model_dict.keys()}'
   assert observe_frames > 0 and predict_frames > 0 and \
       observe_frames + predict_frames <= NUM_FRAMES, \
@@ -238,8 +285,8 @@ if __name__ == '__main__':
   with open(REDUCED_NGSIM_JSON_PATH) as fp:
     pair_info = json.load(fp)
 
-  ego = Vehicle(**pair_info[7]['ego'])
-  pre = Vehicle(**pair_info[7]['pre'])
+  ego = Vehicle(**pair_info[60]['ego'])
+  pre = Vehicle(**pair_info[60]['pre'])
 
   from pretraj.merics import ADE, FDE
 
@@ -248,12 +295,15 @@ if __name__ == '__main__':
 
   groundtruth_record = ego.space_headway_vector[observe_frames:observe_frames+predict_frames]
 
-  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'nn')
-  result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('nn:', result)
+  # hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'nn')
+  # result = ADE(np.array(ds_record), np.array(groundtruth_record))
+  # print('nn:', result)
   hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'adapt')
   result = ADE(np.array(ds_record), np.array(groundtruth_record))
   print('adapt:', result)
-  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'constantv')
+  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'regularized_adapt')
   result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('constantv:', result)
+  print('regularized adapt:', result)
+  # hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'constantv')
+  # result = ADE(np.array(ds_record), np.array(groundtruth_record))
+  # print('constantv:', result)
