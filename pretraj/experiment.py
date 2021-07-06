@@ -58,8 +58,10 @@ def experiment(
       hard_braking, (ds_record, _, _) = predict.predict(ego, pre, observe_frames, predict_frames, model)
       if model not in result:
         result[model] = {'ADE':0, 'FDE':0, 'hard_braking':0}
-      result[model]['ADE'] += ADE(np.array(ds_record), np.array(groundtruth_record)) / number_vehicles
-      result[model]['FDE'] += FDE(np.array(ds_record), np.array(groundtruth_record)) / number_vehicles
+      result[model]['ADE'] += \
+          ADE(np.array(ds_record), np.array(groundtruth_record)) / number_vehicles / 3.2808399
+      result[model]['FDE'] += \
+          FDE(np.array(ds_record), np.array(groundtruth_record)) / number_vehicles / 3.2808399
       result[model]['hard_braking'] += hard_braking
     
   return result
@@ -94,7 +96,7 @@ def experiment_fixed_observe(draw_only=False):
 
   plt.xticks(predict_frames_list)
   plt.xlabel('Predict frames (10ms)')
-  plt.ylabel('ADE')
+  plt.ylabel('ADE (m)')
   plt.legend()
   plt.title('Evaluation of prediction models with 10s observe frames.')
   plt.savefig(FIXED_OBSERVE_FIG_PATH, dpi=400)
@@ -131,7 +133,7 @@ def experiment_fixed_predict(draw_only=False):
 
   plt.xticks(observe_frames_list)
   plt.xlabel('Observe frames (10ms)')
-  plt.ylabel('ADE')
+  plt.ylabel('ADE (m)')
   plt.legend()
   plt.title('Evaluation of prediction models with 5s predict frames.')
   plt.savefig(FIXED_PREDICT_FIG_PATH, dpi=400)
@@ -153,6 +155,6 @@ def experiment_runtime():
 
 if __name__ == '__main__':
   warm_up()
-  experiment_fixed_observe(draw_only=True)
-  experiment_fixed_predict(draw_only=True)
+  experiment_fixed_observe(draw_only=False)
+  experiment_fixed_predict(draw_only=False)
   experiment_runtime()

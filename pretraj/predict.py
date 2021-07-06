@@ -167,11 +167,6 @@ def nn_model(
     tensor = torch.FloatTensor([[ego_state.ds, ego_state.v, pre_state.v]]).to(device)
     return model(tensor)[0][0].detach().cpu().numpy()
 
-  # TODO: test
-  # tensor = torch.FloatTensor([[78.97, 25.42, 34.91]]).to(device)
-  # print(model(tensor)[0][0].detach().cpu().numpy())
-  # print(np.hstack([X, Y.numpy()]))
-
   return control_law
 
 
