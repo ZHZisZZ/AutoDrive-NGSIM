@@ -96,10 +96,10 @@ def experiment_fixed_observe(draw_only=False):
     plt.plot(predict_frames_list, ADE_list, label=model_names[model])
 
   plt.xticks(predict_frames_list)
-  plt.xlabel('Predict frames (10ms)')
+  plt.xlabel('Predict frames (0.1s)')
   plt.ylabel('ADE (m)')
   plt.legend()
-  plt.title('Evaluation of prediction models with 10s observe frames.')
+  plt.title('Evaluation of prediction models with 10s observe frames')
   plt.savefig(FIXED_OBSERVE_FIG_PATH, dpi=400)
   plt.close()
 
@@ -133,10 +133,10 @@ def experiment_fixed_predict(draw_only=False):
     plt.plot(observe_frames_list, ADE_list, label=model_names[model])
 
   plt.xticks(observe_frames_list)
-  plt.xlabel('Observe frames (10ms)')
+  plt.xlabel('Observe frames (0.1s)')
   plt.ylabel('ADE (m)')
   plt.legend()
-  plt.title('Evaluation of prediction models with 5s predict frames.')
+  plt.title('Evaluation of prediction models with 5s predict frames')
   plt.savefig(FIXED_PREDICT_FIG_PATH, dpi=400)
   plt.close()
 
@@ -156,6 +156,6 @@ def experiment_runtime():
 
 if __name__ == '__main__':
   warm_up()
-  experiment_fixed_observe(draw_only=False)
-  experiment_fixed_predict(draw_only=False)
+  experiment_fixed_observe(draw_only=True)
+  experiment_fixed_predict(draw_only=True)
   experiment_runtime()
