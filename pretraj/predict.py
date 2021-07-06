@@ -113,6 +113,44 @@ def adapt_model(
   return control_law
 
 
+def regularized_adapt_model(
+    ego: Vehicle,
+    pre: Vehicle,
+    observe_frames: int, 
+) -> Callable:
+  """Get adapt model control function.
+
+  Args:
+    ego: instance of ego vehicle
+    pre: instance of precede vehicle
+    observe_frames: the number of observed frames before prediction
+
+  Returns:
+    adapt model control function
+  """
+  # Linear regressor to learn coefficients kv, kg, gs
+  dv = (pre.vel_vector - ego.vel_vector)[:observe_frames]
+  gt = (ego.space_headway_vector - pre.vehicle_length)[:observe_frames]
+  Y = ego.acc_vector[:observe_frames] # ground truth acceleration
+  X = np.vstack([dv, gt]).T.reshape(-1,2)
+
+  average_dv = np.average(dv)
+  Y = np.hstack([0, Y])
+  X = np.vstack([[average_dv, average_dv], X])
+
+  reg = LinearRegression(positive=True).fit(X, Y)
+  kv, kg = reg.coef_
+  c = reg.intercept_
+  # gs = -reg.intercept_/(kg if kg else 1)
+
+  def control_law(ego_state, pre_state):
+    dv = pre_state.v - ego_state.v
+    gt = ego_state.ds - pre.vehicle_length # pre.vehicle_length is constant
+    return kv * dv + kg * gt + c
+
+  return control_law
+
+
 def nn_model(
     ego: Vehicle,
     pre: Vehicle,
@@ -168,14 +206,6 @@ def nn_model(
     return model(tensor)[0][0].detach().cpu().numpy()
 
   return control_law
-
-
-def probability_model(
-    ego: Vehicle,
-    pre: Vehicle,
-    observe_frames: int, 
-) -> Callable:
-  pass
 
 
 def predict(

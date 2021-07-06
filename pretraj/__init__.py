@@ -11,10 +11,10 @@ NUM_FRAMES = 200
 
 # file paths related to ngsim
 NGSIM_DIRT = 'pretraj/ngsim/'
-NGSIM_PATH = 'pretraj/ngsim/NGSIM.csv'
-TEMP_REDUCED_NGSIM_PATH = 'pretraj/ngsim/TEMP_REDUCED_NGSIM.csv'
-REDUCED_NGSIM_PATH = 'pretraj/ngsim/REDUCED_NGSIM.csv'
-REDUCED_NGSIM_JSON_PATH = 'pretraj/ngsim/REDUCED_NGSIM.json'
+NGSIM_PATH = NGSIM_DIRT + 'NGSIM.csv'
+TEMP_REDUCED_NGSIM_PATH = NGSIM_DIRT + 'TEMP_REDUCED_NGSIM.csv'
+REDUCED_NGSIM_PATH = NGSIM_DIRT + 'REDUCED_NGSIM.csv'
+REDUCED_NGSIM_JSON_PATH = NGSIM_DIRT + 'REDUCED_NGSIM.json'
 
 # outliers
 outliers = [113]
