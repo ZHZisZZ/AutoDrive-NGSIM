@@ -1,4 +1,7 @@
 To reproduce the experiment results:
 ```
-python3 -m pretraj.experiment
+$ ls
+pretraj README.md
+
+$ python3 -m pretraj.experiment
 ```
