@@ -4,6 +4,7 @@ import torch
 import cvxopt as cvx
 import picos as pic
 from torch import nn
+from pathlib import Path
 from copy import copy
 from typing import Tuple, Callable, List, Any
 from sklearn.linear_model import LinearRegression
@@ -71,7 +72,7 @@ def simulate(
 
 
 @cache
-def constantv_model(**argvs) -> Callable:
+def constant_velocity_model(**argvs) -> Callable:
   """Get constant velocity model control function."""
   def control_law(ego_state, pre_state):
     return 0
@@ -104,7 +105,7 @@ def IDM_model(pre: Vehicle, **argvs) -> Callable:
   
 
 @cache
-def adapt_model(
+def adaptation_model(
     ego: Vehicle,
     pre: Vehicle,
     observe_frames: int,
@@ -140,7 +141,7 @@ def adapt_model(
 
 
 @cache
-def regularized_adapt_model(
+def regularized_adaptation_model(
     ego: Vehicle,
     pre: Vehicle,
     observe_frames: int,
@@ -216,7 +217,7 @@ def regularized_adapt_model(
   
 
 @cache
-def nn_model(
+def neural_network(
     ego: Vehicle,
     pre: Vehicle,
     observe_frames: int,
@@ -247,20 +248,19 @@ def nn_model(
     torch.nn.ReLU(),
     torch.nn.Linear(32, 1)
   ).to(device)
-
   lr = 1e-3
-  lowest = float("inf")
-  cnt = 0
+  n_epoch = 50
   opt = torch.optim.Adam(model.parameters(), lr=lr)
-  # torch.optim.
-  for _ in range(1000):
+
+  # load from checkpoint
+  checkpoint = torch.load(PRETRAIN_MODEL_PATH)
+  model.load_state_dict(checkpoint['model_state_dict'])
+  opt.load_state_dict(checkpoint['optimizer_state_dict'])
+  
+  for _ in range(n_epoch):
     pred = model(X)
     # loss = torch.nn.MSELoss()(Y, pred)
     loss = nn.L1Loss()(Y, pred)
-
-    cnt += 1
-    if loss < lowest: cnt = 0; lowest = loss
-    if cnt > 50: break
 
     # print(loss)
     loss.backward()
@@ -274,6 +274,77 @@ def nn_model(
   return control_law
 
 
+
+def pretrain_neural_network():
+  # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+  device = torch.device('cpu')
+
+  with open(REDUCED_NGSIM_JSON_PATH) as fp:
+      pair_info = json.load(fp)
+
+  vehicle_pairs_list = \
+    [(Vehicle(**pair_info[i]['ego']),
+      Vehicle(**pair_info[i]['pre']))
+      for i in range(len(pair_info) // 4)]
+
+  # NUM_FRAMES = 200
+  ds = np.hstack([ego.space_headway_vector[:NUM_FRAMES] for ego, _ in vehicle_pairs_list])
+  ego_v = np.hstack([ego.vel_vector[:NUM_FRAMES] for ego, _ in vehicle_pairs_list])
+  pre_v = np.hstack([pre.vel_vector[:NUM_FRAMES] for _, pre in vehicle_pairs_list])
+
+  Y = torch.FloatTensor(
+      np.vstack([ego.acc_vector[:NUM_FRAMES][:,None] 
+                 for ego, _ in vehicle_pairs_list])).to(device)
+  X = torch.FloatTensor(np.vstack([ds, ego_v, pre_v]).T).to(device)
+  permutation = torch.randperm(Y.size()[0])
+  Y = Y[permutation]; X = X[permutation]
+
+  split_point = X.size()[0] // 4
+  Y_train = Y[:split_point]; X_train = X[:split_point]
+  Y_test = Y[split_point:];  X_test = X[split_point:]
+  
+
+  model = torch.nn.Sequential(
+    torch.nn.Linear(3, 32),
+    torch.nn.ReLU(),
+    torch.nn.Linear(32, 1)
+  ).to(device)
+
+
+  lr = 1e-3
+  n_epochs = 100
+  batch_size = 512 * 2
+  opt = torch.optim.Adam(model.parameters(), lr=lr)
+  # obj = torch.nn.MSELoss()
+  obj = torch.nn.L1Loss()
+
+  lowest = float("inf")
+  cnt = 0
+  for epoch in range(n_epochs):
+    permutation = torch.randperm(X_train.size()[0])
+
+    for i in range(0, X_train.size()[0], batch_size):
+      indices = permutation[i:i+batch_size]
+      batch_x, batch_y = X_train[indices], Y_train[indices]
+      pred = model(batch_x)
+      # loss = torch.nn.MSELoss()(batch_y, pred)
+      loss = obj(batch_y, pred)
+
+      loss.backward()
+      opt.step()
+      opt.zero_grad()
+
+    cnt += 1
+    eval = obj(Y_test, model(X_test))
+    if eval < lowest: cnt = 0; lowest = eval
+    if cnt > 10: break
+
+  Path(CHECKPOINT_DIR).mkdir(exist_ok=True)
+  torch.save({'model_state_dict': model.state_dict(),
+              'optimizer_state_dict': opt.state_dict(),
+             }, PRETRAIN_MODEL_PATH)
+
+
 def predict(
     ego: Vehicle, 
     pre: Vehicle,
@@ -283,11 +354,11 @@ def predict(
 ) -> Tuple[List[int], List[int], List[int], bool]:
   """predict """
   model_dict = {
-      'constantv': constantv_model, 
+      'constant velocity': constant_velocity_model, 
       'IDM': IDM_model, 
-      'adapt': adapt_model, 
-      'regularized_adapt': regularized_adapt_model ,
-      'nn':nn_model}
+      'adaptation': adaptation_model, 
+      'regularized adaptation': regularized_adaptation_model,
+      'neural network': neural_network}
   assert model in model_dict.keys(), f'model should be {model_dict.keys()}'
   assert observe_frames > 0 and predict_frames > 0 and \
       observe_frames + predict_frames <= NUM_FRAMES, \
@@ -309,8 +380,8 @@ if __name__ == '__main__':
   with open(REDUCED_NGSIM_JSON_PATH) as fp:
     pair_info = json.load(fp)
 
-  ego = Vehicle(**pair_info[9]['ego'])
-  pre = Vehicle(**pair_info[9]['pre'])
+  ego = Vehicle(**pair_info[10]['ego'])
+  pre = Vehicle(**pair_info[10]['pre'])
 
   from pretraj.merics import ADE, FDE
 
@@ -320,15 +391,22 @@ if __name__ == '__main__':
 
   groundtruth_record = ego.space_headway_vector[observe_frames:observe_frames+predict_frames]
 
-  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'nn')
+
+  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'neural network')
   result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('nn:', result)
-  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'adapt')
-  result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('adapt:', result)
+  print('neural network:', result)
+  # hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'adapt')
+  # result = ADE(np.array(ds_record), np.array(groundtruth_record))
+  # print('adapt:', result)
   # hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'regularized_adapt')
   # result = ADE(np.array(ds_record), np.array(groundtruth_record))
   # print('regularized adapt:', result)
   # hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'constantv')
   # result = ADE(np.array(ds_record), np.array(groundtruth_record))
   # print('constantv:', result)
+
+
+"""
+if __name__ == '__main__':
+  pretrain_neural_network()
+"""

@@ -1,272 +1,272 @@
 [
   {
-    "constantv": {
-      "ADE": 2.187792501954555,
-      "FDE": 5.597470127491849,
+    "constant velocity": {
+      "ADE": 2.1765012153132846,
+      "FDE": 5.611946338192886,
       "hard_braking": 0
     },
     "IDM": {
-      "ADE": 2.1451818082502454,
-      "FDE": 4.298332577445915,
+      "ADE": 1.9922827518494128,
+      "FDE": 3.9007920329367898,
+      "hard_braking": 1
+    },
+    "adaptation": {
+      "ADE": 2.304704477662124,
+      "FDE": 5.28701775815848,
+      "hard_braking": 8
+    },
+    "regularized adaptation": {
+      "ADE": 1.9378084952130008,
+      "FDE": 4.80977286349369,
       "hard_braking": 0
     },
-    "adapt": {
-      "ADE": 2.42460747193286,
-      "FDE": 5.443377289784284,
-      "hard_braking": 2
-    },
-    "regularized_adapt": {
-      "ADE": 2.0276698352728384,
-      "FDE": 5.047258649721576,
-      "hard_braking": 0
-    },
-    "nn": {
-      "ADE": 5.40052098566069,
-      "FDE": 21.37837506404679,
-      "hard_braking": 11
+    "neural network": {
+      "ADE": 2.0993812207108533,
+      "FDE": 5.183649065261909,
+      "hard_braking": 1
     }
   },
   {
-    "constantv": {
-      "ADE": 2.285749897965661,
-      "FDE": 5.650578479411118,
+    "constant velocity": {
+      "ADE": 2.1961765192495517,
+      "FDE": 5.564119158561566,
       "hard_braking": 0
     },
     "IDM": {
-      "ADE": 2.1064611281381906,
-      "FDE": 4.160013899720966,
-      "hard_braking": 0
+      "ADE": 2.0055309936813686,
+      "FDE": 3.880173592175947,
+      "hard_braking": 1
     },
-    "adapt": {
-      "ADE": 2.2132079610287287,
-      "FDE": 4.58094861688884,
-      "hard_braking": 2
-    },
-    "regularized_adapt": {
-      "ADE": 1.9010815554802523,
-      "FDE": 4.263142755649873,
-      "hard_braking": 0
-    },
-    "nn": {
-      "ADE": 3.0798302619370195,
-      "FDE": 8.28418804325852,
-      "hard_braking": 14
-    }
-  },
-  {
-    "constantv": {
-      "ADE": 2.1763434214919584,
-      "FDE": 5.257029864009321,
-      "hard_braking": 0
-    },
-    "IDM": {
-      "ADE": 2.0773012043316688,
-      "FDE": 4.099336078815585,
-      "hard_braking": 0
-    },
-    "adapt": {
-      "ADE": 2.181362756054705,
-      "FDE": 4.716739819514989,
-      "hard_braking": 2
-    },
-    "regularized_adapt": {
-      "ADE": 1.7137623638328414,
-      "FDE": 3.697113420181379,
-      "hard_braking": 2
-    },
-    "nn": {
-      "ADE": 2.8436603459043925,
-      "FDE": 7.956359766677873,
+    "adaptation": {
+      "ADE": 2.078970484258138,
+      "FDE": 4.300466886280118,
       "hard_braking": 6
-    }
-  },
-  {
-    "constantv": {
-      "ADE": 1.9491183949573414,
-      "FDE": 4.675203240893694,
-      "hard_braking": 0
     },
-    "IDM": {
-      "ADE": 2.089923771081114,
-      "FDE": 4.168035458994027,
-      "hard_braking": 0
-    },
-    "adapt": {
-      "ADE": 2.2007568247877294,
-      "FDE": 4.5859296795494915,
+    "regularized adaptation": {
+      "ADE": 1.877231122699302,
+      "FDE": 4.395286283005497,
       "hard_braking": 1
     },
-    "regularized_adapt": {
-      "ADE": 1.6118913090938785,
-      "FDE": 3.627328584290592,
-      "hard_braking": 1
-    },
-    "nn": {
-      "ADE": 2.0374592178655364,
-      "FDE": 4.9143550659888255,
-      "hard_braking": 4
-    }
-  },
-  {
-    "constantv": {
-      "ADE": 2.0654127011805716,
-      "FDE": 5.013317880379755,
-      "hard_braking": 0
-    },
-    "IDM": {
-      "ADE": 2.0371097395948476,
-      "FDE": 4.037338246811981,
-      "hard_braking": 0
-    },
-    "adapt": {
-      "ADE": 2.1462924268015455,
-      "FDE": 4.395504905879537,
-      "hard_braking": 1
-    },
-    "regularized_adapt": {
-      "ADE": 1.6877547449670316,
-      "FDE": 3.6217842521217123,
-      "hard_braking": 1
-    },
-    "nn": {
-      "ADE": 2.2742691206889343,
-      "FDE": 5.514000956096257,
-      "hard_braking": 6
-    }
-  },
-  {
-    "constantv": {
-      "ADE": 2.3830889360577063,
-      "FDE": 5.590785863502009,
-      "hard_braking": 0
-    },
-    "IDM": {
-      "ADE": 2.0553135852080087,
-      "FDE": 3.953816977369545,
-      "hard_braking": 0
-    },
-    "adapt": {
-      "ADE": 2.0724473022745076,
-      "FDE": 4.06238399145535,
-      "hard_braking": 0
-    },
-    "regularized_adapt": {
-      "ADE": 1.9048942383781757,
-      "FDE": 3.9442403383561775,
-      "hard_braking": 0
-    },
-    "nn": {
-      "ADE": 2.241675318099239,
-      "FDE": 5.636853341088951,
-      "hard_braking": 4
-    }
-  },
-  {
-    "constantv": {
-      "ADE": 2.1607540800756544,
-      "FDE": 5.1647100081496395,
-      "hard_braking": 0
-    },
-    "IDM": {
-      "ADE": 1.9994669884729461,
-      "FDE": 3.926691401025862,
-      "hard_braking": 0
-    },
-    "adapt": {
-      "ADE": 1.9603883707593168,
-      "FDE": 4.107106459662519,
-      "hard_braking": 0
-    },
-    "regularized_adapt": {
-      "ADE": 1.740035754790707,
-      "FDE": 3.907487683650338,
-      "hard_braking": 0
-    },
-    "nn": {
-      "ADE": 1.8291749976969118,
-      "FDE": 4.019900891296563,
-      "hard_braking": 1
-    }
-  },
-  {
-    "constantv": {
-      "ADE": 2.0386652210612293,
-      "FDE": 4.836210792648961,
-      "hard_braking": 0
-    },
-    "IDM": {
-      "ADE": 1.9920212641646438,
-      "FDE": 3.8463889267919407,
-      "hard_braking": 0
-    },
-    "adapt": {
-      "ADE": 2.0427750473955406,
-      "FDE": 4.152543877411282,
-      "hard_braking": 0
-    },
-    "regularized_adapt": {
-      "ADE": 1.8132220931951903,
-      "FDE": 3.8514083068678984,
-      "hard_braking": 0
-    },
-    "nn": {
-      "ADE": 1.9479213907722206,
-      "FDE": 4.584816229016323,
-      "hard_braking": 0
-    }
-  },
-  {
-    "constantv": {
-      "ADE": 1.9774546958742683,
-      "FDE": 4.571760217050922,
-      "hard_braking": 0
-    },
-    "IDM": {
-      "ADE": 1.911347302711685,
-      "FDE": 3.803608284194883,
-      "hard_braking": 0
-    },
-    "adapt": {
-      "ADE": 1.8862675624878444,
-      "FDE": 3.8706842778028796,
-      "hard_braking": 0
-    },
-    "regularized_adapt": {
-      "ADE": 1.7320463253407392,
-      "FDE": 3.7692926151537884,
-      "hard_braking": 0
-    },
-    "nn": {
-      "ADE": 1.7584984455804094,
-      "FDE": 3.749878048236095,
+    "neural network": {
+      "ADE": 1.9388142172259386,
+      "FDE": 4.68714276050327,
       "hard_braking": 2
     }
   },
   {
-    "constantv": {
-      "ADE": 1.898390348154446,
-      "FDE": 4.624368696970962,
+    "constant velocity": {
+      "ADE": 2.1770016092744684,
+      "FDE": 5.361694583816392,
       "hard_braking": 0
     },
     "IDM": {
-      "ADE": 1.9325033833820358,
-      "FDE": 3.8670730273785163,
-      "hard_braking": 0
-    },
-    "adapt": {
-      "ADE": 1.674865521510779,
-      "FDE": 3.400516660601866,
-      "hard_braking": 0
-    },
-    "regularized_adapt": {
-      "ADE": 1.5936254777712424,
-      "FDE": 3.512399010200954,
-      "hard_braking": 0
-    },
-    "nn": {
-      "ADE": 1.401560529967193,
-      "FDE": 2.9860075894056073,
+      "ADE": 1.9495700111296008,
+      "FDE": 3.8232069211431274,
       "hard_braking": 1
+    },
+    "adaptation": {
+      "ADE": 2.1409703529998914,
+      "FDE": 4.500799234197921,
+      "hard_braking": 6
+    },
+    "regularized adaptation": {
+      "ADE": 1.7548901697064327,
+      "FDE": 3.89465462635828,
+      "hard_braking": 5
+    },
+    "neural network": {
+      "ADE": 1.9458601411799634,
+      "FDE": 4.569509616965584,
+      "hard_braking": 1
+    }
+  },
+  {
+    "constant velocity": {
+      "ADE": 2.1383601801408125,
+      "FDE": 5.224661852523633,
+      "hard_braking": 0
+    },
+    "IDM": {
+      "ADE": 1.961213455159065,
+      "FDE": 3.840944015821779,
+      "hard_braking": 1
+    },
+    "adaptation": {
+      "ADE": 2.2130356290570075,
+      "FDE": 4.661372500776875,
+      "hard_braking": 9
+    },
+    "regularized adaptation": {
+      "ADE": 1.7509660331415375,
+      "FDE": 3.842900835643854,
+      "hard_braking": 5
+    },
+    "neural network": {
+      "ADE": 1.8482105034509828,
+      "FDE": 4.229673190465515,
+      "hard_braking": 1
+    }
+  },
+  {
+    "constant velocity": {
+      "ADE": 2.105886588426959,
+      "FDE": 5.03161487184454,
+      "hard_braking": 0
+    },
+    "IDM": {
+      "ADE": 1.9266827658703924,
+      "FDE": 3.756610429110618,
+      "hard_braking": 0
+    },
+    "adaptation": {
+      "ADE": 2.1502418749338212,
+      "FDE": 4.444116546553836,
+      "hard_braking": 7
+    },
+    "regularized adaptation": {
+      "ADE": 1.730022393465175,
+      "FDE": 3.701954285578912,
+      "hard_braking": 4
+    },
+    "neural network": {
+      "ADE": 1.862156334343203,
+      "FDE": 4.160716508319635,
+      "hard_braking": 5
+    }
+  },
+  {
+    "constant velocity": {
+      "ADE": 2.3423835436531073,
+      "FDE": 5.6802057503512895,
+      "hard_braking": 0
+    },
+    "IDM": {
+      "ADE": 1.9842658223299745,
+      "FDE": 3.845304748917316,
+      "hard_braking": 1
+    },
+    "adaptation": {
+      "ADE": 2.1339324462688247,
+      "FDE": 4.330714624365242,
+      "hard_braking": 6
+    },
+    "regularized adaptation": {
+      "ADE": 1.9261315367348124,
+      "FDE": 4.0711080616543915,
+      "hard_braking": 1
+    },
+    "neural network": {
+      "ADE": 1.9678638804055422,
+      "FDE": 4.411645329402054,
+      "hard_braking": 0
+    }
+  },
+  {
+    "constant velocity": {
+      "ADE": 2.14375385133769,
+      "FDE": 5.27483431671799,
+      "hard_braking": 0
+    },
+    "IDM": {
+      "ADE": 1.8941238720768803,
+      "FDE": 3.8072080734093716,
+      "hard_braking": 0
+    },
+    "adaptation": {
+      "ADE": 1.9627549926795227,
+      "FDE": 4.0321196971124,
+      "hard_braking": 5
+    },
+    "regularized adaptation": {
+      "ADE": 1.752960351299128,
+      "FDE": 3.797080507908426,
+      "hard_braking": 2
+    },
+    "neural network": {
+      "ADE": 1.7378844434256389,
+      "FDE": 3.856476257432171,
+      "hard_braking": 1
+    }
+  },
+  {
+    "constant velocity": {
+      "ADE": 2.0879657081328475,
+      "FDE": 5.140760014173357,
+      "hard_braking": 1
+    },
+    "IDM": {
+      "ADE": 1.9350986466562115,
+      "FDE": 3.8276278539510393,
+      "hard_braking": 2
+    },
+    "adaptation": {
+      "ADE": 1.8570295163601296,
+      "FDE": 3.9436534167679356,
+      "hard_braking": 5
+    },
+    "regularized adaptation": {
+      "ADE": 1.6266113228253904,
+      "FDE": 3.6198844738870988,
+      "hard_braking": 3
+    },
+    "neural network": {
+      "ADE": 1.6256879342245127,
+      "FDE": 3.5684839559506543,
+      "hard_braking": 2
+    }
+  },
+  {
+    "constant velocity": {
+      "ADE": 2.0802272550029604,
+      "FDE": 5.0777137774827175,
+      "hard_braking": 0
+    },
+    "IDM": {
+      "ADE": 1.9340103309035417,
+      "FDE": 3.882807742596977,
+      "hard_braking": 1
+    },
+    "adaptation": {
+      "ADE": 1.8737598003568046,
+      "FDE": 4.043197599176488,
+      "hard_braking": 4
+    },
+    "regularized adaptation": {
+      "ADE": 1.6602202070177126,
+      "FDE": 3.7171117313210185,
+      "hard_braking": 2
+    },
+    "neural network": {
+      "ADE": 1.622780463549201,
+      "FDE": 3.6236087322438544,
+      "hard_braking": 0
+    }
+  },
+  {
+    "constant velocity": {
+      "ADE": 1.9674554050940334,
+      "FDE": 4.9874330486558875,
+      "hard_braking": 0
+    },
+    "IDM": {
+      "ADE": 1.9249827949986944,
+      "FDE": 3.8984799244780115,
+      "hard_braking": 1
+    },
+    "adaptation": {
+      "ADE": 1.7164907774475846,
+      "FDE": 3.710899000131155,
+      "hard_braking": 4
+    },
+    "regularized adaptation": {
+      "ADE": 1.6361768382716184,
+      "FDE": 3.676659491649782,
+      "hard_braking": 3
+    },
+    "neural network": {
+      "ADE": 1.4949403617704002,
+      "FDE": 3.4462159349025567,
+      "hard_braking": 0
     }
   }
 ]

@@ -10,11 +10,11 @@ random.seed(3)
 NUM_FRAMES = 200
 
 # file paths related to ngsim
-NGSIM_DIRT = 'pretraj/ngsim/'
-NGSIM_PATH = NGSIM_DIRT + 'NGSIM.csv'
-TEMP_REDUCED_NGSIM_PATH = NGSIM_DIRT + 'TEMP_REDUCED_NGSIM.csv'
-REDUCED_NGSIM_PATH = NGSIM_DIRT + 'REDUCED_NGSIM.csv'
-REDUCED_NGSIM_JSON_PATH = NGSIM_DIRT + 'REDUCED_NGSIM.json'
+NGSIM_DIR = 'pretraj/ngsim/'
+NGSIM_PATH = NGSIM_DIR + 'NGSIM.csv'
+TEMP_REDUCED_NGSIM_PATH = NGSIM_DIR + 'TEMP_REDUCED_NGSIM.csv'
+REDUCED_NGSIM_PATH = NGSIM_DIR + 'REDUCED_NGSIM.csv'
+REDUCED_NGSIM_JSON_PATH = NGSIM_DIR + 'REDUCED_NGSIM.json'
 
 # outliers
 outliers = [113]
@@ -26,3 +26,7 @@ FIXED_OBSERVE_FIG_PATH = RESULT_DIR + 'fixed_observe.png'
 FIXED_PREDICT_JSON_PATH = RESULT_DIR + 'fixed_predict.json'
 FIXED_PREDICT_FIG_PATH = RESULT_DIR + 'fixed_predict.png'
 RUNTIME_PATH = RESULT_DIR + 'runtime.json'
+
+# checkpoint
+CHECKPOINT_DIR = 'pretraj/checkpoint/'
+PRETRAIN_MODEL_PATH = CHECKPOINT_DIR + 'pretrain_model.pt'
