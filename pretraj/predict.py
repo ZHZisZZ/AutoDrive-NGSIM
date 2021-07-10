@@ -276,7 +276,7 @@ def neural_network(
 
 
 def pretrain_neural_network():
-  # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+  """pretrain the model on NGSIM and save to pretrain_model.pt"""
   device = torch.device('cpu')
 
   with open(REDUCED_NGSIM_JSON_PATH) as fp:
@@ -395,15 +395,16 @@ if __name__ == '__main__':
   hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'neural network')
   result = ADE(np.array(ds_record), np.array(groundtruth_record))
   print('neural network:', result)
-  # hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'adapt')
-  # result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  # print('adapt:', result)
-  # hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'regularized_adapt')
-  # result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  # print('regularized adapt:', result)
-  # hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'constantv')
-  # result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  # print('constantv:', result)
+  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'adaptation')
+  result = ADE(np.array(ds_record), np.array(groundtruth_record))
+  print('adapt:', result)
+  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'regularized adaptation')
+  result = ADE(np.array(ds_record), np.array(groundtruth_record))
+  print('regularized adapt:', result)
+  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'constant velocity')
+  result = ADE(np.array(ds_record), np.array(groundtruth_record))
+  print('constantv:', result)
+
 
 
 """
