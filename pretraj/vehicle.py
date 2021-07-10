@@ -11,7 +11,6 @@ class Vehicle(object):
       self, 
       vehicle_id, 
       frame_id, 
-      vehicle_class,
       vehicle_length, 
       # acc_vector,
       vel_vector, 

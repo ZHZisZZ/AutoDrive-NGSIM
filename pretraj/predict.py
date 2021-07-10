@@ -5,11 +5,32 @@ import cvxopt as cvx
 import picos as pic
 from torch import nn
 from copy import copy
-from typing import Tuple, List, Callable
+from typing import Tuple, Callable, List, Any
 from sklearn.linear_model import LinearRegression
 from pretraj.vehicle import Vehicle, State
 
 from pretraj import *
+
+
+def cache(fn):
+  cache_info = {}
+  def new_fn(
+      ego: Vehicle, 
+      pre: Vehicle, 
+      observe_frames: int, 
+      **argvs: Any
+  ) -> Callable:
+    # print(cache_info)
+    key = (ego.vehicle_id, pre.vehicle_id, observe_frames)
+    if key in cache_info:
+      return cache_info[key]
+    result = fn(ego=ego,
+                pre=pre, 
+                observe_frames=observe_frames, 
+                **argvs)
+    cache_info[key] = result
+    return result
+  return new_fn
 
 
 def simulate(
@@ -49,6 +70,7 @@ def simulate(
   return hard_braking, tuple(zip(*[(state.ds, state.v, state.a) for state in state_record]))
 
 
+@cache
 def constantv_model(**argvs) -> Callable:
   """Get constant velocity model control function."""
   def control_law(ego_state, pre_state):
@@ -57,6 +79,7 @@ def constantv_model(**argvs) -> Callable:
   return control_law
 
 
+@cache
 def IDM_model(pre: Vehicle, **argvs) -> Callable:
   """Get IDM model control function."""
   Metre_Foot = 3.2808399
@@ -80,6 +103,7 @@ def IDM_model(pre: Vehicle, **argvs) -> Callable:
   return control_law
   
 
+@cache
 def adapt_model(
     ego: Vehicle,
     pre: Vehicle,
@@ -115,6 +139,7 @@ def adapt_model(
   return control_law
 
 
+@cache
 def regularized_adapt_model(
     ego: Vehicle,
     pre: Vehicle,
@@ -160,8 +185,6 @@ def regularized_adapt_model(
     x = prob.add_variable('x', m)
     X = prob.add_variable('X', (m, m), vtype='symmetric')
     prob.add_constraint(x >= EPS)
-    # prob.add_constraint(x[:2] <= K_UB)
-    # [[1, x']; [x, X]] > 0
     prob.add_constraint(((1 & x.T) // (x & X)) >> 0)
     prob.add_constraint(0.5*(X | B) + q.T*x  == 0)
 
@@ -192,7 +215,7 @@ def regularized_adapt_model(
   return control_law
   
 
-
+@cache
 def nn_model(
     ego: Vehicle,
     pre: Vehicle,
@@ -259,7 +282,12 @@ def predict(
     model='adapt'
 ) -> Tuple[List[int], List[int], List[int], bool]:
   """predict """
-  model_dict = {'constantv': constantv_model, 'IDM': IDM_model, 'adapt': adapt_model, 'regularized_adapt': regularized_adapt_model ,'nn':nn_model}
+  model_dict = {
+      'constantv': constantv_model, 
+      'IDM': IDM_model, 
+      'adapt': adapt_model, 
+      'regularized_adapt': regularized_adapt_model ,
+      'nn':nn_model}
   assert model in model_dict.keys(), f'model should be {model_dict.keys()}'
   assert observe_frames > 0 and predict_frames > 0 and \
       observe_frames + predict_frames <= NUM_FRAMES, \
@@ -298,9 +326,9 @@ if __name__ == '__main__':
   hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'adapt')
   result = ADE(np.array(ds_record), np.array(groundtruth_record))
   print('adapt:', result)
-  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'regularized_adapt')
-  result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('regularized adapt:', result)
-  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'constantv')
-  result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('constantv:', result)
+  # hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'regularized_adapt')
+  # result = ADE(np.array(ds_record), np.array(groundtruth_record))
+  # print('regularized adapt:', result)
+  # hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'constantv')
+  # result = ADE(np.array(ds_record), np.array(groundtruth_record))
+  # print('constantv:', result)
