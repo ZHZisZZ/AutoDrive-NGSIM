@@ -43,7 +43,7 @@ def experiment(
 def experiment_fixed_observe(draw_only=False):
   """fixed observe_frames, and change predict_frames."""
   observe_frames = 100
-  predict_frames_list = [10, 20, 30, 40, 50]
+  predict_frames_list = np.array([10, 20, 30, 40, 50])
   if not draw_only: 
     print('='*10 + 'fixed observe frames' + '='*10)
     results_list = []
@@ -65,13 +65,13 @@ def experiment_fixed_observe(draw_only=False):
       for result in results_list] for model in simulate.models_list}
 
   for model, ADE_list in ADE_dict.items():
-    plt.plot(predict_frames_list, ADE_list, label=model)
+    plt.plot(predict_frames_list*.1, ADE_list, label=model)
 
-  plt.xticks(predict_frames_list)
-  plt.xlabel('Predict frames (0.1s)')
+  plt.xticks(predict_frames_list*.1)
+  plt.xlabel('Prediction window (s)')
   plt.ylabel('ADE (m)')
   plt.legend()
-  plt.title('Evaluation of prediction models with 10s observe frames')
+  plt.title('Evaluation of the predicted trajectory with 10s observation window')
   plt.savefig(pretraj.FIXED_OBSERVE_FIG_PATH, dpi=400)
   plt.close()
 
@@ -102,13 +102,13 @@ def experiment_fixed_predict(draw_only=False):
       for result in results_list] for model in simulate.models_list}
 
   for model, ADE_list in ADE_dict.items():
-    plt.plot(observe_frames_list, ADE_list, label=model)
+    plt.plot(observe_frames_list*.1, ADE_list, label=model)
 
-  plt.xticks(observe_frames_list)
-  plt.xlabel('Observe frames (0.1s)')
+  plt.xticks(observe_frames_list*.1)
+  plt.xlabel('Observation window (s)')
   plt.ylabel('ADE (m)')
-  plt.legend()
-  plt.title('Evaluation of prediction models with 5s predict frames')
+  # plt.legend()
+  plt.title('Evaluation of the predicted trajectory with 5s prediction window.')
   plt.savefig(pretraj.FIXED_PREDICT_FIG_PATH, dpi=400)
   plt.close()
 
@@ -129,7 +129,9 @@ def experiment_runtime():
 if __name__ == '__main__':
   # if 'checkpoint' not in os.listdir('pretraj') or \
   #    'pretrain_model.pt' not in os.listdir(pretraj.CHECKPOINT_DIR):
-  models.pretrain_neural_network()
-  experiment_fixed_observe(draw_only=False)
-  # experiment_fixed_predict(draw_only=False)
+  draw_only = True
+  if not draw_only:
+    models.pretrain_neural_network()
+  experiment_fixed_observe(draw_only)
+  experiment_fixed_predict(draw_only)
   experiment_runtime()

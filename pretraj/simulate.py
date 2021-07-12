@@ -11,8 +11,9 @@ models_list = [
     'constant velocity', 
     'IDM', 
     'interaction',
-    'adapt interaction',
-    'regularized interaction',
+    'interaction (adaptation)',
+    'interaction (regularization)',
+    'interaction (adaptation + regularization)',
     'neural network'
 ]
 
@@ -65,8 +66,9 @@ def simulate(
       'constant velocity': models.constant_velocity_model, 
       'IDM': models.IDM_model, 
       'interaction': models.interaction_model,
-      'adapt interaction': models.interaction_model,
-      'regularized interaction': models.regularized_interaction_model,
+      'interaction (adaptation)': models.interaction_model,
+      'interaction (regularization)': models.regularized_interaction_model,
+      'interaction (adaptation + regularization)': models.regularized_interaction_model,
       'neural network': models.neural_network}
   assert model in models_dict.keys(), f'model should be {models_dict.keys()}'
   assert observe_frames > 0 and predict_frames > 0 and \
@@ -102,19 +104,8 @@ if __name__ == '__main__':
 
   groundtruth_record = ego.space_headway_vector[observe_frames:observe_frames+predict_frames]
 
-
-  hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, 'neural network')
-  result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('neural network:', result)
-  hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, 'adapt interaction')
-  result = metrics.ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('adapt interaction:', result)
-  hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, 'interaction')
-  result = metrics.ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('interaction:', result)
-  hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, 'regularized interaction')
-  result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('regularized adapt:', result)
-  hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, 'constant velocity')
-  result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('constantv:', result)
+  models_list = ['interaction', 'interaction (adaptation)', 'interaction (regularization)', 'interaction (adaptation + regularization)']
+  for model in models_list:
+    hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, model)
+    result = ADE(np.array(ds_record), np.array(groundtruth_record))
+    print(model, result)
