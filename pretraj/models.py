@@ -11,21 +11,45 @@ import pretraj
 from pretraj import vehicle
 
 
+# def cache(fn):
+#   cache_info = {}
+#   def new_fn(
+#       ego: vehicle.Vehicle, 
+#       pre: vehicle.Vehicle, 
+#       observe_frames: int, 
+#       adapt: bool,
+#       **argvs: Any
+#   ) -> Callable:
+#     # print(cache_info)
+#     key = (ego.vehicle_id, pre.vehicle_id, observe_frames, adapt)
+#     if key in cache_info:
+#       return cache_info[key]
+#     result = fn(ego=ego,
+#                 pre=pre, 
+#                 observe_frames=observe_frames, 
+#                 adapt=adapt,
+#                 **argvs)
+#     cache_info[key] = result
+#     return result
+#   return new_fn
+
 def cache(fn):
   cache_info = {}
   def new_fn(
       ego: vehicle.Vehicle, 
       pre: vehicle.Vehicle, 
       observe_frames: int, 
+      adapt: bool,
       **argvs: Any
   ) -> Callable:
     # print(cache_info)
-    key = (ego.vehicle_id, pre.vehicle_id, observe_frames)
-    if key in cache_info:
+    key = (ego.vehicle_id, pre.vehicle_id, observe_frames, adapt)
+    if key in cache_info and not adapt:
       return cache_info[key]
     result = fn(ego=ego,
                 pre=pre, 
                 observe_frames=observe_frames, 
+                adapt=adapt,
                 **argvs)
     cache_info[key] = result
     return result
@@ -66,10 +90,11 @@ def IDM_model(pre: vehicle.Vehicle, **argvs) -> Callable:
   
 
 @cache
-def adaptation_model(
+def interaction_model(
     ego: vehicle.Vehicle,
     pre: vehicle.Vehicle,
     observe_frames: int,
+    adapt: bool = False,
     **argvs,
 ) -> Callable:
   """Get adapt model control function.
@@ -93,19 +118,37 @@ def adaptation_model(
   c = reg.intercept_
   # gs = -reg.intercept_/(kg if kg else 1)
 
+
   def control_law(ego_state, pre_state):
     dv = pre_state.v - ego_state.v
     gt = ego_state.ds - pre.vehicle_length # pre.vehicle_length is constant
     return kv * dv + kg * gt + c
 
-  return control_law
+  lamb = .9
+  w = np.array([[kv, kg, c]]) # 1 * 3
+  H = 1e-4 * np.eye(3) # 3 * 3
+  ego_states = ego.states(observe_frames)
+
+  def adapt_control_law(ego_state, pre_state):
+    nonlocal w, H
+    dv = pre_state.v - ego_state.v
+    gt = ego_state.ds - pre.vehicle_length # pre.vehicle_length is constant
+    f = np.array([dv, gt, 1])[:, None] # 3 * 1
+    a = w @ f # 1 * 1
+    e = ego_states.pop(0).a - w @ f # 1 * 1
+    H = lamb * H + f @ f.T
+    w = w + e @ f.T @ np.linalg.inv(H)
+    return a[0][0]
+
+  return control_law if not adapt else adapt_control_law
 
 
 @cache
-def regularized_adaptation_model(
+def regularized_interaction_model(
     ego: vehicle.Vehicle,
     pre: vehicle.Vehicle,
     observe_frames: int,
+    adapt: bool = False,
     **argvs,
 ) -> Callable:
   """Get regularized adapt model control function.

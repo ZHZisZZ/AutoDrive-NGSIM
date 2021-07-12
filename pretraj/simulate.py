@@ -4,13 +4,15 @@ from copy import copy
 from typing import Tuple, Callable, List
 from pretraj import vehicle
 from pretraj import models
+from pretraj import metrics
 import pretraj
 
 models_list = [
     'constant velocity', 
     'IDM', 
-    'adaptation', 
-    'regularized adaptation',
+    'interaction',
+    'adapt interaction',
+    'regularized interaction',
     'neural network'
 ]
 
@@ -56,14 +58,15 @@ def simulate(
     pre: vehicle.Vehicle,
     observe_frames: int,
     predict_frames: int,
-    model='adapt'
+    model='constant velocity'
 ) -> Tuple[List[int], List[int], List[int], bool]:
   """simulate"""
   models_dict = {
       'constant velocity': models.constant_velocity_model, 
       'IDM': models.IDM_model, 
-      'adaptation': models.adaptation_model, 
-      'regularized adaptation': models.regularized_adaptation_model,
+      'interaction': models.interaction_model,
+      'adapt interaction': models.interaction_model,
+      'regularized interaction': models.regularized_interaction_model,
       'neural network': models.neural_network}
   assert model in models_dict.keys(), f'model should be {models_dict.keys()}'
   assert observe_frames > 0 and predict_frames > 0 and \
@@ -73,7 +76,8 @@ def simulate(
   control_law = models_dict[model](
       ego=ego, 
       pre=pre, 
-      observe_frames=observe_frames)
+      observe_frames=observe_frames,
+      adapt=True if 'adapt' in model else False)
 
   return _simulate(
       ego.state(observe_frames-1),
@@ -82,12 +86,13 @@ def simulate(
 
 
 
+# test
 if __name__ == '__main__':
   with open(pretraj.REDUCED_NGSIM_JSON_PATH) as fp:
     pair_info = json.load(fp)
 
-  ego = vehicle.Vehicle(**pair_info[10]['ego'])
-  pre = vehicle.Vehicle(**pair_info[10]['pre'])
+  ego = vehicle.Vehicle(**pair_info[1]['ego'])
+  pre = vehicle.Vehicle(**pair_info[1]['pre'])
 
   from pretraj.metrics import ADE, FDE
 
@@ -101,10 +106,13 @@ if __name__ == '__main__':
   hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, 'neural network')
   result = ADE(np.array(ds_record), np.array(groundtruth_record))
   print('neural network:', result)
-  hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, 'adaptation')
-  result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('adapt:', result)
-  hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, 'regularized adaptation')
+  hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, 'adapt interaction')
+  result = metrics.ADE(np.array(ds_record), np.array(groundtruth_record))
+  print('adapt interaction:', result)
+  hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, 'interaction')
+  result = metrics.ADE(np.array(ds_record), np.array(groundtruth_record))
+  print('interaction:', result)
+  hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, 'regularized interaction')
   result = ADE(np.array(ds_record), np.array(groundtruth_record))
   print('regularized adapt:', result)
   hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, 'constant velocity')

@@ -1,3 +1,4 @@
+import pretraj
 import numpy as np
 
 
@@ -31,6 +32,8 @@ class Vehicle(object):
         v=self.vel_vector[i],
         a=self.acc_vector[i])
 
-  def states(self, observe_frames, predict_frames):
+  def states(self, observe_frames, predict_frames=None):
+    if not predict_frames: 
+      predict_frames = pretraj.NUM_FRAMES - observe_frames
     return [self.state(i)
         for i in range(observe_frames, observe_frames+predict_frames)]

@@ -10,12 +10,17 @@
       "FDE": 3.861606838919355,
       "hard_braking": 1
     },
-    "adaptation": {
+    "interaction": {
       "ADE": 2.3438249362233483,
       "FDE": 5.388120622736709,
       "hard_braking": 9
     },
-    "regularized adaptation": {
+    "adapt interaction": {
+      "ADE": 1.21484181695636,
+      "FDE": 2.8770858710543403,
+      "hard_braking": 5
+    },
+    "regularized interaction": {
       "ADE": 1.9402623533426027,
       "FDE": 4.818114613024369,
       "hard_braking": 0
@@ -37,12 +42,17 @@
       "FDE": 3.8349123239143306,
       "hard_braking": 1
     },
-    "adaptation": {
+    "interaction": {
       "ADE": 2.104192289427901,
       "FDE": 4.316590122952923,
       "hard_braking": 6
     },
-    "regularized adaptation": {
+    "adapt interaction": {
+      "ADE": 1.0123699424601016,
+      "FDE": 2.3181774281199594,
+      "hard_braking": 3
+    },
+    "regularized interaction": {
       "ADE": 1.8747109769126962,
       "FDE": 4.380913166694397,
       "hard_braking": 1
@@ -64,12 +74,17 @@
       "FDE": 3.783983406229581,
       "hard_braking": 1
     },
-    "adaptation": {
+    "interaction": {
       "ADE": 2.1695667619501666,
       "FDE": 4.602277321071873,
       "hard_braking": 7
     },
-    "regularized adaptation": {
+    "adapt interaction": {
+      "ADE": 1.062129953571445,
+      "FDE": 2.543903193296734,
+      "hard_braking": 1
+    },
+    "regularized interaction": {
       "ADE": 1.7622995507891495,
       "FDE": 3.9220805289467524,
       "hard_braking": 5
@@ -91,12 +106,17 @@
       "FDE": 3.790184159988854,
       "hard_braking": 1
     },
-    "adaptation": {
+    "interaction": {
       "ADE": 2.210889023007372,
       "FDE": 4.681618835253871,
       "hard_braking": 9
     },
-    "regularized adaptation": {
+    "adapt interaction": {
+      "ADE": 1.075401769802194,
+      "FDE": 2.5514534496860968,
+      "hard_braking": 0
+    },
+    "regularized interaction": {
       "ADE": 1.761197113958147,
       "FDE": 3.862964004300101,
       "hard_braking": 5
@@ -118,12 +138,17 @@
       "FDE": 3.7024950223743756,
       "hard_braking": 0
     },
-    "adaptation": {
+    "interaction": {
       "ADE": 2.14274849336945,
       "FDE": 4.434431702419228,
       "hard_braking": 7
     },
-    "regularized adaptation": {
+    "adapt interaction": {
+      "ADE": 1.3694573957010827,
+      "FDE": 3.212750038912278,
+      "hard_braking": 2
+    },
+    "regularized interaction": {
       "ADE": 1.7231643024461805,
       "FDE": 3.680087764460365,
       "hard_braking": 4
@@ -145,12 +170,17 @@
       "FDE": 3.7862539342157526,
       "hard_braking": 1
     },
-    "adaptation": {
+    "interaction": {
       "ADE": 2.1334906281706303,
       "FDE": 4.318186740197452,
       "hard_braking": 6
     },
-    "regularized adaptation": {
+    "adapt interaction": {
+      "ADE": 1.2879809606035175,
+      "FDE": 2.9895140677123564,
+      "hard_braking": 4
+    },
+    "regularized interaction": {
       "ADE": 1.9019299009401056,
       "FDE": 4.030607586257153,
       "hard_braking": 1
@@ -172,12 +202,17 @@
       "FDE": 3.790099379581772,
       "hard_braking": 0
     },
-    "adaptation": {
+    "interaction": {
       "ADE": 1.9574005800129828,
       "FDE": 4.01405840499353,
       "hard_braking": 5
     },
-    "regularized adaptation": {
+    "adapt interaction": {
+      "ADE": 1.0905950712416537,
+      "FDE": 2.5751906816099006,
+      "hard_braking": 1
+    },
+    "regularized interaction": {
       "ADE": 1.7442488584560645,
       "FDE": 3.7957899455337367,
       "hard_braking": 2
@@ -199,12 +234,17 @@
       "FDE": 3.81367558987941,
       "hard_braking": 2
     },
-    "adaptation": {
+    "interaction": {
       "ADE": 1.832016372113719,
       "FDE": 3.9039726583696046,
       "hard_braking": 5
     },
-    "regularized adaptation": {
+    "adapt interaction": {
+      "ADE": 1.0595857407816422,
+      "FDE": 2.4826164698996376,
+      "hard_braking": 3
+    },
+    "regularized interaction": {
       "ADE": 1.6181681045536134,
       "FDE": 3.5934659674862455,
       "hard_braking": 3
@@ -226,12 +266,17 @@
       "FDE": 3.8821724735867593,
       "hard_braking": 1
     },
-    "adaptation": {
+    "interaction": {
       "ADE": 1.8525019828345368,
       "FDE": 3.989963255300113,
       "hard_braking": 4
     },
-    "regularized adaptation": {
+    "adapt interaction": {
+      "ADE": 0.9940712219439204,
+      "FDE": 2.3404062781029493,
+      "hard_braking": 1
+    },
+    "regularized interaction": {
       "ADE": 1.6469096733291162,
       "FDE": 3.6807247417108067,
       "hard_braking": 2
@@ -253,12 +298,17 @@
       "FDE": 3.8773659307378243,
       "hard_braking": 1
     },
-    "adaptation": {
+    "interaction": {
       "ADE": 1.7019380041864267,
       "FDE": 3.6633396133542155,
       "hard_braking": 4
     },
-    "regularized adaptation": {
+    "adapt interaction": {
+      "ADE": 0.9801950812780028,
+      "FDE": 2.31234969437166,
+      "hard_braking": 1
+    },
+    "regularized interaction": {
       "ADE": 1.6256811594258151,
       "FDE": 3.639170346804171,
       "hard_braking": 3
