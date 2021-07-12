@@ -5,19 +5,17 @@ import cvxopt as cvx
 import picos as pic
 from torch import nn
 from pathlib import Path
-from copy import copy
-from typing import Tuple, Callable, List, Any
+from typing import Callable, Any
 from sklearn.linear_model import LinearRegression
-from pretraj.vehicle import Vehicle, State
-
-from pretraj import *
+import pretraj
+from pretraj import vehicle
 
 
 def cache(fn):
   cache_info = {}
   def new_fn(
-      ego: Vehicle, 
-      pre: Vehicle, 
+      ego: vehicle.Vehicle, 
+      pre: vehicle.Vehicle, 
       observe_frames: int, 
       **argvs: Any
   ) -> Callable:
@@ -34,43 +32,6 @@ def cache(fn):
   return new_fn
 
 
-def simulate(
-    ego_state: State, 
-    pre_states: List[State],
-    control_law: Callable[[State, State], float]
-) -> Tuple[bool, Tuple[List[int], List[int], List[int]]]:
-  """Simulate the trajectory of ego vehicle according to states and control law.
-
-  Args:
-    ego_state: the state of ego vehicle at the last observed frame.
-    pre_states: the states of precede vehicles over all predicted frames.
-    control_law: a function that maps current states of two vehicles to the
-      acceleration of the ego vehicle.
-
-  Returns:
-    A tuple of lists of predicted ego vehicle states (headway, velocity, acceleration)
-    and indication whether the car hard brakes.
-  """
-  state_record = []
-  dt = .1
-  hard_braking = False
-  for i, pre_state in enumerate(pre_states):
-    dv = pre_state.v - ego_state.v
-    da = pre_state.a - ego_state.a
-
-    ego_state.ds += dv * dt + .5 * da * dt**2
-    ego_state.v += (ego_state.a) * dt
-    if ego_state.v <= 0:
-      hard_braking = True
-      ego_state.v = 0
-      # does not change ego_state.ds for simplicity
-    ego_state.a = control_law(ego_state, pre_state)
-
-    state_record.append(copy(ego_state))
-
-  return hard_braking, tuple(zip(*[(state.ds, state.v, state.a) for state in state_record]))
-
-
 @cache
 def constant_velocity_model(**argvs) -> Callable:
   """Get constant velocity model control function."""
@@ -81,7 +42,7 @@ def constant_velocity_model(**argvs) -> Callable:
 
 
 @cache
-def IDM_model(pre: Vehicle, **argvs) -> Callable:
+def IDM_model(pre: vehicle.Vehicle, **argvs) -> Callable:
   """Get IDM model control function."""
   Metre_Foot = 3.2808399
   KilometrePerHour_FootPerSecond = 1000 * Metre_Foot / 3600
@@ -106,8 +67,8 @@ def IDM_model(pre: Vehicle, **argvs) -> Callable:
 
 @cache
 def adaptation_model(
-    ego: Vehicle,
-    pre: Vehicle,
+    ego: vehicle.Vehicle,
+    pre: vehicle.Vehicle,
     observe_frames: int,
     **argvs,
 ) -> Callable:
@@ -142,8 +103,8 @@ def adaptation_model(
 
 @cache
 def regularized_adaptation_model(
-    ego: Vehicle,
-    pre: Vehicle,
+    ego: vehicle.Vehicle,
+    pre: vehicle.Vehicle,
     observe_frames: int,
     **argvs,
 ) -> Callable:
@@ -218,8 +179,8 @@ def regularized_adaptation_model(
 
 @cache
 def neural_network(
-    ego: Vehicle,
-    pre: Vehicle,
+    ego: vehicle.Vehicle,
+    pre: vehicle.Vehicle,
     observe_frames: int,
     **argvs,
 ) -> Callable:
@@ -253,7 +214,7 @@ def neural_network(
   opt = torch.optim.Adam(model.parameters(), lr=lr)
 
   # load from checkpoint
-  checkpoint = torch.load(PRETRAIN_MODEL_PATH)
+  checkpoint = torch.load(pretraj.PRETRAIN_MODEL_PATH)
   model.load_state_dict(checkpoint['model_state_dict'])
   opt.load_state_dict(checkpoint['optimizer_state_dict'])
   
@@ -277,24 +238,17 @@ def neural_network(
 
 def pretrain_neural_network():
   """pretrain the model on NGSIM and save to pretrain_model.pt"""
+  print('='*10 + 'Pretraining Model' + '='*10)
   device = torch.device('cpu')
 
-  with open(REDUCED_NGSIM_JSON_PATH) as fp:
-      pair_info = json.load(fp)
-
-  vehicle_pairs_list = \
-    [(Vehicle(**pair_info[i]['ego']),
-      Vehicle(**pair_info[i]['pre']))
-      for i in range(len(pair_info) // 4)]
-
   # NUM_FRAMES = 200
-  ds = np.hstack([ego.space_headway_vector[:NUM_FRAMES] for ego, _ in vehicle_pairs_list])
-  ego_v = np.hstack([ego.vel_vector[:NUM_FRAMES] for ego, _ in vehicle_pairs_list])
-  pre_v = np.hstack([pre.vel_vector[:NUM_FRAMES] for _, pre in vehicle_pairs_list])
+  ds = np.hstack([ego.space_headway_vector[:pretraj.NUM_FRAMES] for ego, _ in pretraj.vehicle_pairs_list])
+  ego_v = np.hstack([ego.vel_vector[:pretraj.NUM_FRAMES] for ego, _ in pretraj.vehicle_pairs_list])
+  pre_v = np.hstack([pre.vel_vector[:pretraj.NUM_FRAMES] for _, pre in pretraj.vehicle_pairs_list])
 
   Y = torch.FloatTensor(
-      np.vstack([ego.acc_vector[:NUM_FRAMES][:,None] 
-                 for ego, _ in vehicle_pairs_list])).to(device)
+      np.vstack([ego.acc_vector[:pretraj.NUM_FRAMES][:,None] 
+                 for ego, _ in pretraj.vehicle_pairs_list])).to(device)
   X = torch.FloatTensor(np.vstack([ds, ego_v, pre_v]).T).to(device)
   permutation = torch.randperm(Y.size()[0])
   Y = Y[permutation]; X = X[permutation]
@@ -336,78 +290,11 @@ def pretrain_neural_network():
 
     cnt += 1
     eval = obj(Y_test, model(X_test))
+    print('evaluation:', eval)
     if eval < lowest: cnt = 0; lowest = eval
     if cnt > 10: break
 
-  Path(CHECKPOINT_DIR).mkdir(exist_ok=True)
+  Path(pretraj.CHECKPOINT_DIR).mkdir(exist_ok=True)
   torch.save({'model_state_dict': model.state_dict(),
               'optimizer_state_dict': opt.state_dict(),
-             }, PRETRAIN_MODEL_PATH)
-
-
-def predict(
-    ego: Vehicle, 
-    pre: Vehicle,
-    observe_frames: int,
-    predict_frames: int,
-    model='adapt'
-) -> Tuple[List[int], List[int], List[int], bool]:
-  """predict """
-  model_dict = {
-      'constant velocity': constant_velocity_model, 
-      'IDM': IDM_model, 
-      'adaptation': adaptation_model, 
-      'regularized adaptation': regularized_adaptation_model,
-      'neural network': neural_network}
-  assert model in model_dict.keys(), f'model should be {model_dict.keys()}'
-  assert observe_frames > 0 and predict_frames > 0 and \
-      observe_frames + predict_frames <= NUM_FRAMES, \
-      f'observe_frames > 0 and observe_frames < 0 and observe_frames + predict_frames <= {NUM_FRAMES}'
-
-  control_law = model_dict[model](
-      ego=ego, 
-      pre=pre, 
-      observe_frames=observe_frames)
-
-  return simulate(
-      ego.state(observe_frames-1),
-      pre.states(observe_frames, predict_frames),
-      control_law)
-
-
-
-if __name__ == '__main__':
-  with open(REDUCED_NGSIM_JSON_PATH) as fp:
-    pair_info = json.load(fp)
-
-  ego = Vehicle(**pair_info[10]['ego'])
-  pre = Vehicle(**pair_info[10]['pre'])
-
-  from pretraj.merics import ADE, FDE
-
-  observe_frames = 100
-
-  predict_frames = 50
-
-  groundtruth_record = ego.space_headway_vector[observe_frames:observe_frames+predict_frames]
-
-
-  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'neural network')
-  result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('neural network:', result)
-  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'adaptation')
-  result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('adapt:', result)
-  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'regularized adaptation')
-  result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('regularized adapt:', result)
-  hard_braking, (ds_record, _, _) = predict(ego, pre, observe_frames, predict_frames, 'constant velocity')
-  result = ADE(np.array(ds_record), np.array(groundtruth_record))
-  print('constantv:', result)
-
-
-
-"""
-if __name__ == '__main__':
-  pretrain_neural_network()
-"""
+             }, pretraj.PRETRAIN_MODEL_PATH)
