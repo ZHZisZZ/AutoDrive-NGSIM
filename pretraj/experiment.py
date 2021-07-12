@@ -43,7 +43,7 @@ def experiment(
 def experiment_fixed_observe(draw_only=False):
   """fixed observe_frames, and change predict_frames."""
   observe_frames = 100
-  predict_frames_list = [20, 40, 60]
+  predict_frames_list = [20, 40, 60, 80, 100]
   if not draw_only: 
     print('='*10 + 'fixed observe frames' + '='*10)
     results_list = []
@@ -127,10 +127,9 @@ def experiment_runtime():
 
 
 if __name__ == '__main__':
-  # warm_up()
-  if 'checkpoint' not in os.listdir('pretraj') or \
-     'pretrain_model.pt' not in os.listdir(pretraj.CHECKPOINT_DIR):
-    models.pretrain_neural_network()
-  experiment_fixed_observe(draw_only=False)
+  # if 'checkpoint' not in os.listdir('pretraj') or \
+  #    'pretrain_model.pt' not in os.listdir(pretraj.CHECKPOINT_DIR):
+  models.pretrain_neural_network()
+  # experiment_fixed_observe(draw_only=False)
   experiment_fixed_predict(draw_only=False)
   experiment_runtime()

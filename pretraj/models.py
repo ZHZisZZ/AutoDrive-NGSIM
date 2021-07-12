@@ -200,15 +200,17 @@ def neural_network(
   ds = ego.space_headway_vector[:observe_frames]
   ego_v = ego.vel_vector[:observe_frames]
   pre_v = pre.vel_vector[:observe_frames]
+  pre_a = pre.acc_vector[:observe_frames]
   Y = torch.FloatTensor(ego.acc_vector[:observe_frames][:,None]).to(device) # ground truth acceleration
 
-  X = torch.FloatTensor(np.vstack([ds, ego_v, pre_v]).T).to(device)
+  X = torch.FloatTensor(np.vstack([ds, ego_v, pre_v, pre_a]).T).to(device)
 
   model = torch.nn.Sequential(
-    torch.nn.Linear(3, 32),
+    torch.nn.Linear(4, 128),
     torch.nn.ReLU(),
-    torch.nn.Linear(32, 1)
+    torch.nn.Linear(128, 1)
   ).to(device)
+
   lr = 1e-3
   n_epoch = 50
   opt = torch.optim.Adam(model.parameters(), lr=lr)
@@ -229,7 +231,7 @@ def neural_network(
     opt.zero_grad()
 
   def control_law(ego_state, pre_state):
-    tensor = torch.FloatTensor([[ego_state.ds, ego_state.v, pre_state.v]]).to(device)
+    tensor = torch.FloatTensor([[ego_state.ds, ego_state.v, pre_state.v, pre_state.a]]).to(device)
     return model(tensor)[0][0].detach().cpu().numpy()
 
   return control_law
@@ -245,11 +247,12 @@ def pretrain_neural_network():
   ds = np.hstack([ego.space_headway_vector[:pretraj.NUM_FRAMES] for ego, _ in pretraj.vehicle_pairs_list])
   ego_v = np.hstack([ego.vel_vector[:pretraj.NUM_FRAMES] for ego, _ in pretraj.vehicle_pairs_list])
   pre_v = np.hstack([pre.vel_vector[:pretraj.NUM_FRAMES] for _, pre in pretraj.vehicle_pairs_list])
+  pre_a = np.hstack([pre.acc_vector[:pretraj.NUM_FRAMES] for _, pre in pretraj.vehicle_pairs_list])
 
   Y = torch.FloatTensor(
       np.vstack([ego.acc_vector[:pretraj.NUM_FRAMES][:,None] 
                  for ego, _ in pretraj.vehicle_pairs_list])).to(device)
-  X = torch.FloatTensor(np.vstack([ds, ego_v, pre_v]).T).to(device)
+  X = torch.FloatTensor(np.vstack([ds, ego_v, pre_v, pre_a]).T).to(device)
   permutation = torch.randperm(Y.size()[0])
   Y = Y[permutation]; X = X[permutation]
 
@@ -259,9 +262,9 @@ def pretrain_neural_network():
   
 
   model = torch.nn.Sequential(
-    torch.nn.Linear(3, 32),
+    torch.nn.Linear(4, 128),
     torch.nn.ReLU(),
-    torch.nn.Linear(32, 1)
+    torch.nn.Linear(128, 1)
   ).to(device)
 
 

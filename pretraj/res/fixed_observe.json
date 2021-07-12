@@ -21,8 +21,8 @@
       "hard_braking": 1
     },
     "neural network": {
-      "ADE": 0.45309585606544267,
-      "FDE": 1.0440338871392527,
+      "ADE": 0.4505865511225874,
+      "FDE": 1.03188166732462,
       "hard_braking": 0
     }
   },
@@ -48,8 +48,8 @@
       "hard_braking": 2
     },
     "neural network": {
-      "ADE": 1.1220672446724784,
-      "FDE": 2.5521058351983337,
+      "ADE": 1.0961398056638663,
+      "FDE": 2.4497379229696383,
       "hard_braking": 0
     }
   },
@@ -75,8 +75,62 @@
       "hard_braking": 3
     },
     "neural network": {
-      "ADE": 1.9268221771098126,
-      "FDE": 4.428199936586184,
+      "ADE": 1.845939548824481,
+      "FDE": 4.130694775227017,
+      "hard_braking": 0
+    }
+  },
+  {
+    "constant velocity": {
+      "ADE": 4.205278037187977,
+      "FDE": 11.03799517922225,
+      "hard_braking": 0
+    },
+    "IDM": {
+      "ADE": 2.9698908013934724,
+      "FDE": 5.357135804681076,
+      "hard_braking": 1
+    },
+    "adaptation": {
+      "ADE": 2.809798065811278,
+      "FDE": 5.496786930212345,
+      "hard_braking": 5
+    },
+    "regularized adaptation": {
+      "ADE": 2.817263074633277,
+      "FDE": 5.8582233582048895,
+      "hard_braking": 4
+    },
+    "neural network": {
+      "ADE": 2.6186040521312433,
+      "FDE": 5.625289837977189,
+      "hard_braking": 0
+    }
+  },
+  {
+    "constant velocity": {
+      "ADE": 6.080793802221196,
+      "FDE": 15.790977487197711,
+      "hard_braking": 0
+    },
+    "IDM": {
+      "ADE": 3.50685925308356,
+      "FDE": 5.736276244168398,
+      "hard_braking": 1
+    },
+    "adaptation": {
+      "ADE": 3.443495481140454,
+      "FDE": 6.561726240186604,
+      "hard_braking": 9
+    },
+    "regularized adaptation": {
+      "ADE": 3.569159249648255,
+      "FDE": 7.333751389529217,
+      "hard_braking": 9
+    },
+    "neural network": {
+      "ADE": 3.354469053777963,
+      "FDE": 6.887457661475056,
       "hard_braking": 0
     }
   }
