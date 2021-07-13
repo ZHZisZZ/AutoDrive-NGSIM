@@ -13,7 +13,7 @@ models_list = [
     'interaction',
     'interaction (adaptation)',
     'interaction (regularization)',
-    'interaction (adaptation + regularization)',
+    # 'interaction (adaptation + regularization)',
     'neural network'
 ]
 

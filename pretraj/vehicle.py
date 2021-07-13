@@ -8,20 +8,12 @@ class State(object):
 
 
 class Vehicle(object):
-  def __init__(
-      self, 
-      vehicle_id, 
-      frame_id, 
-      vehicle_length, 
-      # acc_vector,
-      vel_vector, 
-      space_headway_vector,
-      **argvs
-  ):
+  def __init__(self, vehicle_id, frame_id, 
+               vehicle_length, vel_vector, 
+               space_headway_vector, **argvs):
     self.vehicle_id = vehicle_id
     self.frame_id=frame_id
     self.vehicle_length=vehicle_length
-    # self.acc_vector=np.array(acc_vector)
     self.vel_vector=np.array(vel_vector)
     self.acc_vector=np.diff(self.vel_vector, append=0) / .1
     self.space_headway_vector=np.array(space_headway_vector)

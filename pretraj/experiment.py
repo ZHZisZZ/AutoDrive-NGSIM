@@ -129,7 +129,7 @@ def experiment_runtime():
 if __name__ == '__main__':
   # if 'checkpoint' not in os.listdir('pretraj') or \
   #    'pretrain_model.pt' not in os.listdir(pretraj.CHECKPOINT_DIR):
-  draw_only = True
+  draw_only = False
   if not draw_only:
     models.pretrain_neural_network()
   experiment_fixed_observe(draw_only)

@@ -20,7 +20,6 @@ def cache(fn):
       adapt: bool,
       **argvs: Any
   ) -> Callable:
-    # print(cache_info)
     key = (ego.vehicle_id, pre.vehicle_id, observe_frames, adapt)
     if key in cache_info and not adapt:
       return cache_info[key]
