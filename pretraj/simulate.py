@@ -13,7 +13,6 @@ models_list = [
     'interaction',
     'interaction (adaptation)',
     'interaction (regularization)',
-    # 'interaction (adaptation + regularization)',
     'neural network'
 ]
 
@@ -66,9 +65,8 @@ def simulate(
       'constant velocity': models.constant_velocity_model, 
       'IDM': models.IDM_model, 
       'interaction': models.interaction_model,
-      'interaction (adaptation)': models.interaction_model,
+      'interaction (adaptation)': models.adaptation_interaction_model,
       'interaction (regularization)': models.regularized_interaction_model,
-      'interaction (adaptation + regularization)': models.regularized_interaction_model,
       'neural network': models.neural_network}
   assert model in models_dict.keys(), f'model should be {models_dict.keys()}'
   assert observe_frames > 0 and predict_frames > 0 and \
@@ -78,8 +76,7 @@ def simulate(
   control_law = models_dict[model](
       ego=ego, 
       pre=pre, 
-      observe_frames=observe_frames,
-      adapt=True if 'adapt' in model else False)
+      observe_frames=observe_frames)
 
   return _simulate(
       ego.state(observe_frames-1),
@@ -93,8 +90,8 @@ if __name__ == '__main__':
   with open(pretraj.REDUCED_NGSIM_JSON_PATH) as fp:
     pair_info = json.load(fp)
 
-  ego = vehicle.Vehicle(**pair_info[1]['ego'])
-  pre = vehicle.Vehicle(**pair_info[1]['pre'])
+  ego = vehicle.Vehicle(**pair_info[18]['ego'])
+  pre = vehicle.Vehicle(**pair_info[18]['pre'])
 
   from pretraj.metrics import ADE, FDE
 
@@ -104,7 +101,8 @@ if __name__ == '__main__':
 
   groundtruth_record = ego.space_headway_vector[observe_frames:observe_frames+predict_frames]
 
-  models_list = ['interaction', 'interaction (adaptation)', 'interaction (regularization)', 'interaction (adaptation + regularization)']
+  models_list = ['interaction', 'interaction (adaptation)', 'interaction (regularization)']
+  # models_list = ['interaction (adaptation)']
   for model in models_list:
     hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, model)
     result = ADE(np.array(ds_record), np.array(groundtruth_record))

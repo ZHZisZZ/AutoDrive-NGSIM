@@ -1,8 +1,8 @@
 {
-  "constant velocity": 0.0003314018249511719,
-  "IDM": 0.00039577484130859375,
-  "interaction": 0.00030803680419921875,
-  "interaction (adaptation)": 0.0020668506622314453,
-  "interaction (regularization)": 0.000316619873046875,
-  "neural network": 0.004465579986572266
+  "constant velocity": 0.0003056526184082031,
+  "IDM": 0.00039076805114746094,
+  "interaction": 0.0007669925689697266,
+  "interaction (adaptation)": 0.0073778629302978516,
+  "interaction (regularization)": 0.015744924545288086,
+  "neural network": 0.06584334373474121
 }

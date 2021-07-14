@@ -1,32 +1,28 @@
-import json
 import numpy as np
 import torch
-import cvxopt as cvx
-import picos as pic
 from torch import nn
-from pathlib import Path
 from typing import Callable, Any
 from sklearn.linear_model import LinearRegression
-import pretraj
 from pretraj import vehicle
-
+from pretraj import simulate
+from pretraj import utils
+import pretraj
 
 def cache(fn):
   cache_info = {}
   def new_fn(
       ego: vehicle.Vehicle, 
       pre: vehicle.Vehicle, 
-      observe_frames: int, 
-      adapt: bool,
+      observe_frames: int,
       **argvs: Any
   ) -> Callable:
-    key = (ego.vehicle_id, pre.vehicle_id, observe_frames, adapt)
-    if key in cache_info and not adapt:
+    # key = (ego.vehicle_id, pre.vehicle_id, observe_frames, adapt)
+    key = (ego.vehicle_id, pre.vehicle_id, observe_frames)
+    if key in cache_info:
       return cache_info[key]
     result = fn(ego=ego,
                 pre=pre, 
-                observe_frames=observe_frames, 
-                adapt=adapt,
+                observe_frames=observe_frames,
                 **argvs)
     cache_info[key] = result
     return result
@@ -71,7 +67,7 @@ def interaction_model(
     ego: vehicle.Vehicle,
     pre: vehicle.Vehicle,
     observe_frames: int,
-    adapt: bool = False,
+    # adapt: bool = False,
     **argvs,
 ) -> Callable:
   """Get adapt model control function.
@@ -95,29 +91,65 @@ def interaction_model(
   c = reg.intercept_
   # gs = -reg.intercept_/(kg if kg else 1)
 
+  def control_law(ego_state, pre_state):
+    dv = pre_state.v - ego_state.v
+    gt = ego_state.ds - pre.vehicle_length # pre.vehicle_length is constant
+    return kv * dv + kg * gt + c
+
+  return control_law
+
+
+@cache
+def adaptation_interaction_model(
+    ego: vehicle.Vehicle,
+    pre: vehicle.Vehicle,
+    observe_frames: int,
+    **argvs,
+) -> Callable:
+  """Get adapt model control function.
+
+  Args:
+    ego: instance of ego vehicle
+    pre: instance of precede vehicle
+    observe_frames: the number of observed frames before prediction
+
+  Returns:
+    adapt model control function
+  """
+
+  lamb = 0.9
+  # w = [kv, kg, c]
+  w = np.load(pretraj.OFFLINE_REGRESSION)
+  H = 1e-4 * np.eye(3) # 3 * 3
+  update_times = 0
+  ego_states = ego.states(1, observe_frames)
+
+  def _adapt_control_law(ego_state, pre_state):
+    nonlocal w, H, update_times
+    dv = pre_state.v - ego_state.v
+    gt = ego_state.ds - pre.vehicle_length # pre.vehicle_length is constant
+    f = np.array([dv, gt, 1])[:, None] # 3 * 1
+    a = w @ f # 1 * 1
+    e = ego_states.pop(0).a - w @ f # 1 * 1
+    # if np.abs(e[0]) < 0.5 and :
+    newH = lamb * H + f @ f.T
+    neww = w + e @ f.T @ np.linalg.inv(newH)
+    # 1/2
+    if np.abs(e[0]) < (1/2)**update_times and all(neww[0][:2]>0):
+      update_times += 1
+      H = newH; w = neww
+    return a[0][0]
+
+  simulate._simulate(ego.state(0), pre.states(1, observe_frames), _adapt_control_law)
+  kv, kg, c = w[0]
 
   def control_law(ego_state, pre_state):
     dv = pre_state.v - ego_state.v
     gt = ego_state.ds - pre.vehicle_length # pre.vehicle_length is constant
     return kv * dv + kg * gt + c
 
-  lamb = .9
-  w = np.array([[kv, kg, c]]) # 1 * 3
-  H = 1e-4 * np.eye(3) # 3 * 3
-  ego_states = ego.states(observe_frames)
+  return control_law
 
-  def adapt_control_law(ego_state, pre_state):
-    nonlocal w, H
-    dv = pre_state.v - ego_state.v
-    gt = ego_state.ds - pre.vehicle_length # pre.vehicle_length is constant
-    f = np.array([dv, gt, 1])[:, None] # 3 * 1
-    a = w @ f # 1 * 1
-    e = ego_states.pop(0).a - w @ f # 1 * 1
-    H = lamb * H + f @ f.T
-    w = w + e @ f.T @ np.linalg.inv(H)
-    return a[0][0]
-
-  return control_law if not adapt else adapt_control_law
 
 
 @cache
@@ -125,7 +157,7 @@ def regularized_interaction_model(
     ego: vehicle.Vehicle,
     pre: vehicle.Vehicle,
     observe_frames: int,
-    adapt: bool = False,
+    # adapt: bool = False,
     **argvs,
 ) -> Callable:
   """Get regularized adapt model control function.
@@ -151,42 +183,10 @@ def regularized_interaction_model(
   bp = np.hstack((ego.acc_vector[:observe_frames], np.sqrt(alpha)*g0, 0, 0))
 
 
-  def solve_sdp(A, b):
-    """Solve dp problem."""
-    # x = [kv, kg, u, g]
-    # kg*g - u = 0
-    K_UB = 20
-    EPS = 1e-5
-    m = A.shape[1]
-    B = np.zeros((m, m))
-    B[1, 3] = B[3, 1] = 1
-    q = np.array([0, 0, -1, 0])
-    A, b, B, q = [cvx.matrix(arr.copy()) for arr in [A, b, B, q]]
-
-    prob = pic.Problem()
-    x = prob.add_variable('x', m)
-    X = prob.add_variable('X', (m, m), vtype='symmetric')
-    prob.add_constraint(x >= EPS)
-    prob.add_constraint(((1 & x.T) // (x & X)) >> 0)
-    prob.add_constraint(0.5*(X | B) + q.T*x  == 0)
-
-    prob.set_objective('min', (X | A.T * A) - 2 * b.T * A * x)
-
-    try:
-        prob.solve(verbose=0, solver='cvxopt', solve_via_dual=False, tol=EPS/2)
-    except ValueError:
-        print(A)
-        print('retrying')
-        prob.solve(verbose=0, solver='cvxopt', solve_via_dual=False, tol=0.1)
-    x_hat = np.array(x.value).T[0]
-    assert (x_hat >= EPS-1e-2).all() and (x_hat[:2] <= K_UB+1e-2).all(), '{}'.format(x)
-    return x_hat
-
-
   if np.linalg.matrix_rank(A) < A.shape[1]:
       params = np.array([0., 0, 0, g0])
   else:
-      params = solve_sdp(Ap, bp)
+      params = utils.solve_sdp(Ap, bp)
   kv, kg, g_star = params[0], params[1], params[3]
 
   def control_law(ego_state, pre_state):
@@ -194,23 +194,8 @@ def regularized_interaction_model(
     gt = ego_state.ds - pre.vehicle_length # pre.vehicle_length is constant
     return kv * dv + kg * (gt - g_star)
 
-  lamb = .9
-  w = np.array([[kv, kg, -kg*g_star]]) # 1 * 3
-  H = 1e-4 * np.eye(3) # 3 * 3
-  ego_states = ego.states(observe_frames)
+  return control_law
 
-  def adapt_control_law(ego_state, pre_state):
-    nonlocal w, H
-    dv = pre_state.v - ego_state.v
-    gt = ego_state.ds - pre.vehicle_length # pre.vehicle_length is constant
-    f = np.array([dv, gt, 1])[:, None] # 3 * 1
-    a = w @ f # 1 * 1
-    e = ego_states.pop(0).a - w @ f # 1 * 1
-    H = lamb * H + f @ f.T
-    w = w + e @ f.T @ np.linalg.inv(H)
-    return a[0][0]
-
-  return control_law if not adapt else adapt_control_law
   
 
 @cache
@@ -274,66 +259,5 @@ def neural_network(
 
 
 
-def pretrain_neural_network():
-  """pretrain the model on NGSIM and save to pretrain_model.pt"""
-  print('='*10 + 'Pretraining Model' + '='*10)
-  device = torch.device('cpu')
-
-  # NUM_FRAMES = 200
-  ds = np.hstack([ego.space_headway_vector[:pretraj.NUM_FRAMES] for ego, _ in pretraj.vehicle_pairs_list])
-  ego_v = np.hstack([ego.vel_vector[:pretraj.NUM_FRAMES] for ego, _ in pretraj.vehicle_pairs_list])
-  pre_v = np.hstack([pre.vel_vector[:pretraj.NUM_FRAMES] for _, pre in pretraj.vehicle_pairs_list])
-  pre_a = np.hstack([pre.acc_vector[:pretraj.NUM_FRAMES] for _, pre in pretraj.vehicle_pairs_list])
-
-  Y = torch.FloatTensor(
-      np.vstack([ego.acc_vector[:pretraj.NUM_FRAMES][:,None] 
-                 for ego, _ in pretraj.vehicle_pairs_list])).to(device)
-  X = torch.FloatTensor(np.vstack([ds, ego_v, pre_v, pre_a]).T).to(device)
-  permutation = torch.randperm(Y.size()[0])
-  Y = Y[permutation]; X = X[permutation]
-
-  split_point = X.size()[0] // 4
-  Y_train = Y[:split_point]; X_train = X[:split_point]
-  Y_test = Y[split_point:];  X_test = X[split_point:]
-  
-
-  model = torch.nn.Sequential(
-    torch.nn.Linear(4, 128),
-    torch.nn.ReLU(),
-    torch.nn.Linear(128, 1)
-  ).to(device)
-
-
-  lr = 1e-3
-  n_epochs = 100
-  batch_size = 512 * 2
-  opt = torch.optim.Adam(model.parameters(), lr=lr)
-  # obj = torch.nn.MSELoss()
-  obj = torch.nn.L1Loss()
-
-  lowest = float("inf")
-  cnt = 0
-  for epoch in range(n_epochs):
-    permutation = torch.randperm(X_train.size()[0])
-
-    for i in range(0, X_train.size()[0], batch_size):
-      indices = permutation[i:i+batch_size]
-      batch_x, batch_y = X_train[indices], Y_train[indices]
-      pred = model(batch_x)
-      # loss = torch.nn.MSELoss()(batch_y, pred)
-      loss = obj(batch_y, pred)
-
-      loss.backward()
-      opt.step()
-      opt.zero_grad()
-
-    cnt += 1
-    eval = obj(Y_test, model(X_test))
-    print('evaluation:', eval)
-    if eval < lowest: cnt = 0; lowest = eval
-    if cnt > 10: break
-
-  Path(pretraj.CHECKPOINT_DIR).mkdir(exist_ok=True)
-  torch.save({'model_state_dict': model.state_dict(),
-              'optimizer_state_dict': opt.state_dict(),
-             }, pretraj.PRETRAIN_MODEL_PATH)
+if __name__ == '__main__':
+  utils.offline_regression(regularized=False)

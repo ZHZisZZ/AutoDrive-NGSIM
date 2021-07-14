@@ -42,3 +42,4 @@ RUNTIME_PATH = RESULT_DIR + 'runtime.json'
 # checkpoint
 CHECKPOINT_DIR = 'pretraj/checkpoint/'
 PRETRAIN_MODEL_PATH = CHECKPOINT_DIR + 'pretrain_model.pt'
+OFFLINE_REGRESSION = CHECKPOINT_DIR + 'offline_regression.npy'

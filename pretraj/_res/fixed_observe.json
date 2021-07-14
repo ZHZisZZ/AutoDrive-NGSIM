@@ -16,8 +16,8 @@
       "hard_braking": 0
     },
     "interaction (adaptation)": {
-      "ADE": 0.1729789119323628,
-      "FDE": 0.4030008196314743,
+      "ADE": 0.19806686877871868,
+      "FDE": 0.47597187106998107,
       "hard_braking": 0
     },
     "interaction (regularization)": {
@@ -48,9 +48,9 @@
       "hard_braking": 2
     },
     "interaction (adaptation)": {
-      "ADE": 0.47338895402880965,
-      "FDE": 1.0818831743880624,
-      "hard_braking": 0
+      "ADE": 0.5730534686933232,
+      "FDE": 1.356635615428801,
+      "hard_braking": 1
     },
     "interaction (regularization)": {
       "ADE": 0.4784228850413517,
@@ -80,9 +80,9 @@
       "hard_braking": 2
     },
     "interaction (adaptation)": {
-      "ADE": 0.7956056778875643,
-      "FDE": 1.757783347915655,
-      "hard_braking": 0
+      "ADE": 1.005700545746799,
+      "FDE": 2.3134172026337696,
+      "hard_braking": 1
     },
     "interaction (regularization)": {
       "ADE": 0.8292825588493784,
@@ -112,9 +112,9 @@
       "hard_braking": 3
     },
     "interaction (adaptation)": {
-      "ADE": 1.1512204243045112,
-      "FDE": 2.601412812504492,
-      "hard_braking": 0
+      "ADE": 1.4787775942469505,
+      "FDE": 3.3859261765171405,
+      "hard_braking": 1
     },
     "interaction (regularization)": {
       "ADE": 1.2153089250375508,
@@ -144,9 +144,9 @@
       "hard_braking": 4
     },
     "interaction (adaptation)": {
-      "ADE": 1.5406528914872328,
-      "FDE": 3.514243825757852,
-      "hard_braking": 0
+      "ADE": 1.9803782301329278,
+      "FDE": 4.4660028600572135,
+      "hard_braking": 2
     },
     "interaction (regularization)": {
       "ADE": 1.6256811594258151,
