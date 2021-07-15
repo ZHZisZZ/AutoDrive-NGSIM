@@ -234,9 +234,7 @@ def neural_network(
 
   lr = 1e-3
   # n_epoch = observe_frames
-  # n_epoch = 50
-  import math
-  n_epoch = int(math.log10(observe_frames))
+  n_epoch = 50
   opt = torch.optim.Adam(model.parameters(), lr=lr)
 
   # load from checkpoint
