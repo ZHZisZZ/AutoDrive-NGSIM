@@ -7,10 +7,16 @@ from typing import Text, Dict
 import matplotlib.pyplot as plt
 import pretraj
 from pretraj import simulate
-from pretraj import models
 from pretraj import metrics
 from pretraj import utils
 
+
+# plt.rc('axes', titlesize=20)
+# plt.rc('axes', labelsize=15)
+# plt.rc('xtick', labelsize=15)
+# plt.rc('ytick', labelsize=15)
+
+plt.rcParams.update({'font.size':13})
 
 def experiment(
     observe_frames: list, 
@@ -71,7 +77,7 @@ def experiment_fixed_observe(draw_only=False):
   plt.xlabel('Predicted trajectory timestep, 0.1s per step')
   plt.ylabel('ADE (m)')
   plt.legend()
-  plt.title('10s observation window')
+  # plt.title('10s observation window')
   plt.savefig(pretraj.FIXED_OBSERVE_FIG_PATH, dpi=400)
   plt.close()
 
@@ -109,7 +115,7 @@ def experiment_fixed_predict(draw_only=False):
   plt.xlabel('Observed trajectory timestep, 0.1s per step')
   plt.ylabel('ADE (m)')
   # plt.legend()
-  plt.title('5s prediction window')
+  # plt.title('5s prediction window')
   plt.savefig(pretraj.FIXED_PREDICT_FIG_PATH, dpi=400)
   plt.close()
 
@@ -131,7 +137,7 @@ if __name__ == '__main__':
   # if 'checkpoint' not in os.listdir('pretraj') or \
   #    'pretrain_model.pt' not in os.listdir(pretraj.CHECKPOINT_DIR):
   # draw_only = False
-  draw_only = True
+  draw_only = False
   if not draw_only:
     utils.pretrain_neural_network()
     utils.offline_regression(regularized=False)

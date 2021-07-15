@@ -15,20 +15,20 @@
       "FDE": 5.388120622736709,
       "hard_braking": 9
     },
-    "interaction (adaptation)": {
+    "adaptable interaction": {
       "ADE": 1.6126089993890165,
       "FDE": 3.849123508179997,
       "hard_braking": 0
     },
-    "interaction (regularization)": {
+    "regularized interaction": {
       "ADE": 1.9402623533426027,
       "FDE": 4.818114613024369,
       "hard_braking": 0
     },
     "neural network": {
-      "ADE": 2.3721004184534777,
-      "FDE": 5.878093899215922,
-      "hard_braking": 10
+      "ADE": 2.3266781155493805,
+      "FDE": 5.7547143390201585,
+      "hard_braking": 1
     }
   },
   {
@@ -47,20 +47,20 @@
       "FDE": 4.316590122952923,
       "hard_braking": 6
     },
-    "interaction (adaptation)": {
+    "adaptable interaction": {
       "ADE": 1.6960085913738003,
       "FDE": 3.8457445028919848,
       "hard_braking": 0
     },
-    "interaction (regularization)": {
+    "regularized interaction": {
       "ADE": 1.8747109769126962,
       "FDE": 4.380913166694397,
       "hard_braking": 1
     },
     "neural network": {
-      "ADE": 2.0188867191731377,
-      "FDE": 4.837703401489831,
-      "hard_braking": 6
+      "ADE": 1.9323043911346607,
+      "FDE": 4.598797285863884,
+      "hard_braking": 0
     }
   },
   {
@@ -79,20 +79,20 @@
       "FDE": 4.602277321071873,
       "hard_braking": 7
     },
-    "interaction (adaptation)": {
+    "adaptable interaction": {
       "ADE": 1.6057922507081754,
       "FDE": 3.6137791787419493,
       "hard_braking": 0
     },
-    "interaction (regularization)": {
+    "regularized interaction": {
       "ADE": 1.7622995507891495,
       "FDE": 3.9220805289467524,
       "hard_braking": 5
     },
     "neural network": {
-      "ADE": 2.0202942437034555,
-      "FDE": 4.6988901012661435,
-      "hard_braking": 5
+      "ADE": 1.8678224022633716,
+      "FDE": 4.323789451291568,
+      "hard_braking": 0
     }
   },
   {
@@ -111,20 +111,20 @@
       "FDE": 4.681618835253871,
       "hard_braking": 9
     },
-    "interaction (adaptation)": {
+    "adaptable interaction": {
       "ADE": 1.588911546738593,
       "FDE": 3.5631797919658434,
       "hard_braking": 0
     },
-    "interaction (regularization)": {
+    "regularized interaction": {
       "ADE": 1.761197113958147,
       "FDE": 3.862964004300101,
       "hard_braking": 5
     },
     "neural network": {
-      "ADE": 1.8945375528096804,
-      "FDE": 4.300393841298197,
-      "hard_braking": 3
+      "ADE": 1.8314703776306265,
+      "FDE": 4.203067357139459,
+      "hard_braking": 0
     }
   },
   {
@@ -143,20 +143,20 @@
       "FDE": 4.434431702419228,
       "hard_braking": 7
     },
-    "interaction (adaptation)": {
+    "adaptable interaction": {
       "ADE": 1.6100436956259603,
       "FDE": 3.513483317085288,
       "hard_braking": 1
     },
-    "interaction (regularization)": {
+    "regularized interaction": {
       "ADE": 1.7231643024461805,
       "FDE": 3.680087764460365,
       "hard_braking": 4
     },
     "neural network": {
-      "ADE": 1.8933476708281183,
-      "FDE": 4.183030108917828,
-      "hard_braking": 7
+      "ADE": 1.8107092550633186,
+      "FDE": 4.061946905378341,
+      "hard_braking": 0
     }
   },
   {
@@ -175,20 +175,20 @@
       "FDE": 4.318186740197452,
       "hard_braking": 6
     },
-    "interaction (adaptation)": {
+    "adaptable interaction": {
       "ADE": 1.7357293027448297,
       "FDE": 3.7763496850259624,
       "hard_braking": 0
     },
-    "interaction (regularization)": {
+    "regularized interaction": {
       "ADE": 1.9019299009401056,
       "FDE": 4.030607586257153,
       "hard_braking": 1
     },
     "neural network": {
-      "ADE": 1.8720499344654522,
-      "FDE": 4.12697818745854,
-      "hard_braking": 3
+      "ADE": 1.9099078648131722,
+      "FDE": 4.321380489572806,
+      "hard_braking": 0
     }
   },
   {
@@ -207,20 +207,20 @@
       "FDE": 4.01405840499353,
       "hard_braking": 5
     },
-    "interaction (adaptation)": {
+    "adaptable interaction": {
       "ADE": 1.6143811604663263,
       "FDE": 3.644339206955184,
       "hard_braking": 0
     },
-    "interaction (regularization)": {
+    "regularized interaction": {
       "ADE": 1.7442488584560645,
       "FDE": 3.7957899455337367,
       "hard_braking": 2
     },
     "neural network": {
-      "ADE": 1.7299633384890267,
-      "FDE": 3.79904770405429,
-      "hard_braking": 2
+      "ADE": 1.7602605402444367,
+      "FDE": 3.992025786220096,
+      "hard_braking": 0
     }
   },
   {
@@ -239,20 +239,20 @@
       "FDE": 3.9039726583696046,
       "hard_braking": 5
     },
-    "interaction (adaptation)": {
+    "adaptable interaction": {
       "ADE": 1.6515360825397203,
       "FDE": 3.6920937000890346,
       "hard_braking": 1
     },
-    "interaction (regularization)": {
+    "regularized interaction": {
       "ADE": 1.6181681045536134,
       "FDE": 3.5934659674862455,
       "hard_braking": 3
     },
     "neural network": {
-      "ADE": 1.6160467396522016,
-      "FDE": 3.5400703491761907,
-      "hard_braking": 3
+      "ADE": 1.6894810026150904,
+      "FDE": 3.8245925102965908,
+      "hard_braking": 1
     }
   },
   {
@@ -271,19 +271,19 @@
       "FDE": 3.989963255300113,
       "hard_braking": 4
     },
-    "interaction (adaptation)": {
+    "adaptable interaction": {
       "ADE": 1.6242774431951044,
       "FDE": 3.5745874196860936,
       "hard_braking": 0
     },
-    "interaction (regularization)": {
+    "regularized interaction": {
       "ADE": 1.6469096733291162,
       "FDE": 3.6807247417108067,
       "hard_braking": 2
     },
     "neural network": {
-      "ADE": 1.6233796417532425,
-      "FDE": 3.549024254507011,
+      "ADE": 1.6900301123769674,
+      "FDE": 3.8336900956797484,
       "hard_braking": 0
     }
   },
@@ -303,19 +303,19 @@
       "FDE": 3.6633396133542155,
       "hard_braking": 4
     },
-    "interaction (adaptation)": {
+    "adaptable interaction": {
       "ADE": 1.5406528914872328,
       "FDE": 3.514243825757852,
       "hard_braking": 0
     },
-    "interaction (regularization)": {
+    "regularized interaction": {
       "ADE": 1.6256811594258151,
       "FDE": 3.639170346804171,
       "hard_braking": 3
     },
     "neural network": {
-      "ADE": 1.4610482580171529,
-      "FDE": 3.3106127309752336,
+      "ADE": 1.6347126271849177,
+      "FDE": 3.8560364465178623,
       "hard_braking": 0
     }
   }

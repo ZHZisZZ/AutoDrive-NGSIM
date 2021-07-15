@@ -222,7 +222,7 @@ def neural_network(
   ego_v = ego.vel_vector[:observe_frames]
   pre_v = pre.vel_vector[:observe_frames]
   pre_a = pre.acc_vector[:observe_frames]
-  Y = torch.FloatTensor(ego.acc_vector[:observe_frames][:,None]).to(device) # ground truth acceleration
+  Y = torch.FloatTensor(ego.acc_vector[:observe_frames][:,None]).to(device)   # ground truth acceleration
 
   X = torch.FloatTensor(np.vstack([ds, ego_v, pre_v, pre_a]).T).to(device)
 
@@ -233,7 +233,10 @@ def neural_network(
   ).to(device)
 
   lr = 1e-3
-  n_epoch = 50
+  # n_epoch = observe_frames
+  # n_epoch = 50
+  import math
+  n_epoch = int(math.log10(observe_frames))
   opt = torch.optim.Adam(model.parameters(), lr=lr)
 
   # load from checkpoint

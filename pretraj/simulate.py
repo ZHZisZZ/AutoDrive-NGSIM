@@ -4,15 +4,14 @@ from copy import copy
 from typing import Tuple, Callable, List
 from pretraj import vehicle
 from pretraj import models
-from pretraj import metrics
 import pretraj
 
 models_list = [
     'constant velocity', 
     'IDM', 
     'interaction',
-    'interaction (adaptation)',
-    'interaction (regularization)',
+    'adaptable interaction',
+    'regularized interaction',
     'neural network'
 ]
 
@@ -61,12 +60,19 @@ def simulate(
     model='constant velocity'
 ) -> Tuple[List[int], List[int], List[int], bool]:
   """simulate"""
+  # models_dict = {
+  #     'constant velocity': models.constant_velocity_model, 
+  #     'IDM': models.IDM_model, 
+  #     'interaction': models.interaction_model,
+  #     'interaction (adaptation)': models.adaptation_interaction_model,
+  #     'interaction (regularization)': models.regularized_interaction_model,
+  #     'neural network': models.neural_network}
   models_dict = {
       'constant velocity': models.constant_velocity_model, 
       'IDM': models.IDM_model, 
       'interaction': models.interaction_model,
-      'interaction (adaptation)': models.adaptation_interaction_model,
-      'interaction (regularization)': models.regularized_interaction_model,
+      'adaptable interaction': models.adaptation_interaction_model,
+      'regularized interaction': models.regularized_interaction_model,
       'neural network': models.neural_network}
   assert model in models_dict.keys(), f'model should be {models_dict.keys()}'
   assert observe_frames > 0 and predict_frames > 0 and \
@@ -102,7 +108,6 @@ if __name__ == '__main__':
   groundtruth_record = ego.space_headway_vector[observe_frames:observe_frames+predict_frames]
 
   models_list = ['interaction', 'interaction (adaptation)', 'interaction (regularization)']
-  # models_list = ['interaction (adaptation)']
   for model in models_list:
     hard_braking, (ds_record, _, _) = simulate(ego, pre, observe_frames, predict_frames, model)
     result = ADE(np.array(ds_record), np.array(groundtruth_record))
